@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://expath.org/ns/pkg" name="${package-name}" abbrev="${package-abbrev}" version="${project.version}"
+    spec="1.0">
+    <title>${package-title}</title>
+    <description>${project.description}</description>
+    <author id="joewiz">Joe Wickentowski</author>
+    <website>${project.url}</website>
+    <license>The 3-Clause BSD License</license>
+    <copyright>true</copyright>
+
+    <type>library</type>
+
+    <status>stable</status>
+
+    <tag>${project.artifactId}</tag>
+
+    <dependency processor="http://exist-db.org" semver-min="${exist.version}" />
+
+    <!-- Collection inside /db/apps where xar-resources will be copied to -->
+    <target>${package-abbrev}</target>
+
+    <!-- includes everything in src/main/xar-resources, README.md, and LICENSE -->
+    <fileSets>
+        <fileSet>
+            <directory>${basedir}</directory>
+            <includes>
+                <include>README.md</include>
+                <include>LICENSE</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/xar-resources</directory>
+        </fileSet>
+    </fileSets>
+
+    <!-- include the XQuery Library modules written in XQuery from this project -->
+    <xquerySets>
+        <xquerySet>
+            <namespace>http://exist-db.org/xquery/semver-xq</namespace>
+            <directory>${basedir}/src/main/xquery</directory>
+            <includes>
+                <include>semver.xqm</include>
+            </includes>
+            <outputDirectory>content</outputDirectory>
+        </xquerySet>
+    </xquerySets>
+
+    <!-- register the Java module to eXist-db -->
+    <!-- components>
+        <resource>
+            <public-uri>${example.module.namespace}</public-uri>
+            <file>urn:java:class:org.exist-db.xquery.semver.${example.module.java.classname}</file>
+        </resource>
+    </components -->
+
+</package>
