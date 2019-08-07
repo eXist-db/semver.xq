@@ -3,7 +3,7 @@
     spec="1.0">
     <title>${package-title}</title>
     <description>${project.description}</description>
-    <author id="joewiz">Joe Wickentowski</author>
+    <author id="joewiz">Joe Wicentowski</author>
     <website>${project.url}</website>
     <license>The 3-Clause BSD License</license>
     <copyright>true</copyright>

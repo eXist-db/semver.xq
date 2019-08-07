@@ -1,5 +1,5 @@
 (:
- : Copyright © 2017, Joe Wickentowski
+ : Copyright © 2019, Joe Wicentowski
  : All rights reserved.
  :
  : Redistribution and use in source and binary forms, with or without

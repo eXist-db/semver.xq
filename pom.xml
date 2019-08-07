@@ -45,7 +45,7 @@
 
     <developers>
         <developer>
-            <name>Joe Wickentowski</name>
+            <name>Joe Wicentowski</name>
             <email>joewiz@gmail.com</email>
         </developer>
     </developers>
@@ -125,7 +125,7 @@
                 <configuration>
                     <header>com/mycila/maven/plugin/license/templates/BSD-3.txt</header>
                     <properties>
-                        <owner>Joe Wickentowski</owner>
+                        <owner>Joe Wicentowski</owner>
                     </properties>
                 </configuration>
             </plugin>
