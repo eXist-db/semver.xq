@@ -17,7 +17,7 @@
 
     <name>Semver.xq</name>
     <description>XQuery Module for Parsing Semantic Versions</description>
-    <url>https://github.com/exist-db/semver.xq</url>
+    <url>https://github.com/eXist-db/semver.xq</url>
 
     <organization>
         <name>The eXist-db Project</name>
@@ -33,14 +33,14 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/exist-db/semver.xq.git</url>
-        <connection>scm:git:https://github.com/exist-db/semver.xq.git</connection>
-        <developerConnection>scm:git:https://github.com/exist-db/semver.xq.git</developerConnection>
+        <url>https://github.com/eXist-db/semver.xq.git</url>
+        <connection>scm:git:https://github.com/eXist-db/semver.xq.git</connection>
+        <developerConnection>scm:git:https://github.com/eXist-db/semver.xq.git</developerConnection>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/exist-db/semver.xq/issues</url>
+        <url>https://github.com/eXist-db/semver.xq/issues</url>
     </issueManagement>
 
     <developers>
