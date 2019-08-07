@@ -15,8 +15,8 @@
     <artifactId>semver-xq</artifactId>
     <version>2.2.0-SNAPSHOT</version>
 
-    <name>Semver.xq</name>
-    <description>XQuery Module for Parsing Semantic Versions</description>
+    <name>semver.xq</name>
+    <description>XQuery Library for Parsing Semantic Versions</description>
     <url>https://github.com/eXist-db/semver.xq</url>
 
     <organization>

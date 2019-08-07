@@ -1,5 +1,5 @@
 (:
- : Copyright © 2017, Joe Wicentowski
+ : Copyright © 2019, Joe Wicentowski
  : All rights reserved.
  :
  : Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ xquery version "3.1";
  :  @see https://gist.github.com/joewiz/b349e2853a17bf817e5d0013d01fa9f9
  :)
 
-module namespace semver = "http://exist-db.org/xquery/semver-xq";
+module namespace semver = "http://exist-db.org/xquery/semver";
 
 (:~ A regular expression for checking a SemVer version string
  :  @author David Fichtmueller

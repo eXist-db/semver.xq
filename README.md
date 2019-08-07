@@ -1,4 +1,4 @@
-# Semver.xq
+# semver.xq
 
 Validate, compare, sort, parse, and serialize Semantic Versioning (SemVer) 2.0.0 version strings, using XQuery.
 

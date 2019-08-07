@@ -36,10 +36,10 @@
     <!-- include the XQuery Library modules written in XQuery from this project -->
     <xquerySets>
         <xquerySet>
-            <namespace>http://exist-db.org/xquery/semver-xq</namespace>
+            <namespace>http://exist-db.org/xquery/semver</namespace>
             <directory>${basedir}/src/main/xquery</directory>
             <includes>
-                <include>semver.xqm</include>
+                <include>semver.xq</include>
             </includes>
             <outputDirectory>content</outputDirectory>
         </xquerySet>

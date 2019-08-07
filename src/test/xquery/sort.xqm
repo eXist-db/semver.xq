@@ -1,5 +1,5 @@
 (:
- : Copyright © 2017, Joe Wicentowski
+ : Copyright © 2019, Joe Wicentowski
  : All rights reserved.
  :
  : Redistribution and use in source and binary forms, with or without
@@ -24,11 +24,12 @@
  : (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  : SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  :)
-xquery version "3.0";
+xquery version "3.1";
 
-module namespace sts = "http://http://exist-db.org/xquery/semver-xq/test/sort";
+module namespace sts = "http://exist-db.org/xquery/semver/test/sort";
 
-import module namespace semver = "http://exist-db.org/xquery/semver-xq";
+import module namespace semver = "http://exist-db.org/xquery/semver";
+
 declare namespace test = "http://exist-db.org/xquery/xqsuite";
 
 

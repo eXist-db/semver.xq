@@ -26,9 +26,10 @@
  :)
 xquery version "3.1";
 
-module namespace stp = "http://http://exist-db.org/xquery/semver-xq/test/parse";
+module namespace stp = "http://exist-db.org/xquery/semver/test/parse";
 
-import module namespace semver = "http://exist-db.org/xquery/semver-xq";
+import module namespace semver = "http://exist-db.org/xquery/semver";
+
 declare namespace test = "http://exist-db.org/xquery/xqsuite";
 
 
