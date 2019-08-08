@@ -196,29 +196,30 @@ declare
     %test:assertEquals
     (
         '<semver major="1" minor="1" patch="2"><pre-release>prerelease</pre-release><build-metadata>meta</build-metadata></semver>',
+        '<semver major="1" minor="1" patch="2"><build-metadata>meta</build-metadata></semver>',
+        '<semver major="1" minor="1" patch="2"><build-metadata>meta-valid</build-metadata></semver>',
         '<semver major="1" minor="0" patch="0"><pre-release>alpha-a</pre-release><pre-release>b-c-somethinglong</pre-release><build-metadata>build</build-metadata><build-metadata>1-aef</build-metadata><build-metadata>1-its-okay</build-metadata></semver>',
         '<semver major="1" minor="0" patch="0"><pre-release>rc</pre-release><pre-release>1</pre-release><build-metadata>build</build-metadata><build-metadata>1</build-metadata></semver>',
         '<semver major="2" minor="0" patch="0"><pre-release>rc</pre-release><pre-release>1</pre-release><build-metadata>build</build-metadata><build-metadata>123</build-metadata></semver>',
+        '<semver major="2" minor="0" patch="0"><build-metadata>build</build-metadata><build-metadata>1848</build-metadata></semver>',
         '<semver major="1" minor="0" patch="0"><pre-release>alpha</pre-release><build-metadata>beta</build-metadata></semver>',
         '<semver major="1" minor="2" patch="3"><pre-release>---RC-SNAPSHOT</pre-release><pre-release>12</pre-release><pre-release>9</pre-release><pre-release>1--</pre-release><pre-release>12</pre-release><build-metadata>788</build-metadata></semver>',
-        '<semver major="1" minor="2" patch="3"><pre-release>---R-S</pre-release><pre-release>12</pre-release><pre-release>9</pre-release><pre-release>1--</pre-release><pre-release>12</pre-release><build-metadata>meta</build-metadata></semver>'
+        '<semver major="1" minor="2" patch="3"><pre-release>---R-S</pre-release><pre-release>12</pre-release><pre-release>9</pre-release><pre-release>1--</pre-release><pre-release>12</pre-release><build-metadata>meta</build-metadata></semver>',
+        '<semver major="1" minor="0" patch="0"><build-metadata>0</build-metadata><build-metadata>build</build-metadata><build-metadata>1-rc</build-metadata><build-metadata>10000aaa-kk-0</build-metadata><build-metadata>1</build-metadata></semver>'
     )
 function stp:major-minor-patch-pre-release-build-metadata() {
-
-    (: TODO(AR) the examples below that are commented out are parsed incorrectly! they detect pre-release data which is actually build-metadata:)
-
     (
         "1.1.2-prerelease+meta",
-        (:"1.1.2+meta",
-        "1.1.2+meta-valid", :)
+        "1.1.2+meta",
+        "1.1.2+meta-valid",
         "1.0.0-alpha-a.b-c-somethinglong+build.1-aef.1-its-okay",
         "1.0.0-rc.1+build.1",
         "2.0.0-rc.1+build.123",
-        (:"2.0.0+build.1848", :)
+        "2.0.0+build.1848",
         "1.0.0-alpha+beta",
         "1.2.3----RC-SNAPSHOT.12.9.1--.12+788",
-        "1.2.3----R-S.12.9.1--.12+meta" (:,
-        "1.0.0+0.build.1-rc.10000aaa-kk-0.1" :)
+        "1.2.3----R-S.12.9.1--.12+meta",
+        "1.0.0+0.build.1-rc.10000aaa-kk-0.1"
     ) ! stp:semver-to-xml(semver:parse(.))
 };
 

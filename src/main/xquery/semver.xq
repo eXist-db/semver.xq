@@ -80,9 +80,9 @@ declare function semver:parse($version as xs:string) as map(*) {
                     else
                         $identifier
                 }
-                let $release-identifiers := subsequence($groups, 1, 3) ! $cast-identifier(.)
-                let $pre-release-identifiers := array { $groups[4] ! tokenize(., "\.") ! $cast-identifier(.) }
-                let $build-metadata-identifiers := array { $groups[5] ! tokenize(., "\.") ! $cast-identifier(.) }
+                let $release-identifiers := $groups[@nr = ("1", "2", "3")] ! $cast-identifier(.)
+                let $pre-release-identifiers := array { $groups[@nr eq "4"] ! tokenize(., "\.") ! $cast-identifier(.) }
+                let $build-metadata-identifiers := array { $groups[@nr eq "5"] ! tokenize(., "\.") ! $cast-identifier(.) }
                 return
                     map {
                         "major": $release-identifiers[1],
