@@ -144,20 +144,19 @@ declare
     )
 function stp:major-minor-patch-pre-release() {
     (
-            "1.0.0-alpha",
-            "1.0.0-beta",
-            "1.0.0-alpha.beta",
-            "1.0.0-alpha.beta.1",
-            "1.0.0-alpha.1",
-            "1.0.0-alpha0.valid",
-            "1.0.0-alpha.0valid",
-            "1.2.3-beta",
-            "10.2.3-DEV-SNAPSHOT",
-            "1.2.3-SNAPSHOT-123",
-            "2.0.1-alpha.1227",
-            "1.2.3----RC-SNAPSHOT.12.9.1--.12",
-            "1.0.0-0A.is.legal"
-
+        "1.0.0-alpha",
+        "1.0.0-beta",
+        "1.0.0-alpha.beta",
+        "1.0.0-alpha.beta.1",
+        "1.0.0-alpha.1",
+        "1.0.0-alpha0.valid",
+        "1.0.0-alpha.0valid",
+        "1.2.3-beta",
+        "10.2.3-DEV-SNAPSHOT",
+        "1.2.3-SNAPSHOT-123",
+        "2.0.1-alpha.1227",
+        "1.2.3----RC-SNAPSHOT.12.9.1--.12",
+        "1.0.0-0A.is.legal"
     ) ! stp:semver-to-xml(semver:parse(.))
 };
 
