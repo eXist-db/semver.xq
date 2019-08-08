@@ -111,87 +111,158 @@ declare function semver:coerce($version as xs:string?) as map(*) {
         let $major-ver := semver:read-version-number($version)
         let $minor-ver := semver:read-version-number($major-ver?tail)
         let $patch := semver:read-version-number($minor-ver?tail)
-        let $pre-release := semver:read-pre-release($patch?tail)
-        return
-            let $mmp := map {
-                "major": $major-ver?number,
-                "minor": $minor-ver?number,
-                "patch": $patch?number
-            }
-            return
+        let $pre-release := semver:read-pre-release(
+          $patch?tail
+        )
+        let $metadata := semver:read-metadata($pre-release?tail)
+        let $mmp := map {
+            "major": $major-ver?number,
+            "minor": $minor-ver?number,
+            "patch": $patch?number
+        } return
+            let $mmppr :=
                 if (not(empty($pre-release?identifier)))
                 then
-                    let $mmppr := map:merge(($mmp, map { "pre-release": $pre-release?identifier }))
-                    let $metadata := semver:read-metadata($pre-release?tail)
-                    return
-                        if (not(empty($metadata?identifier)))
-                        then
-                            map:merge(($mmppr, map { "build-metadata": $metadata?identifier }))
-                        else
-                            map:merge(($mmppr, map { "build-metadata": [] }))
+                    map:merge(($mmp, map { "pre-release": array { $pre-release?identifier } }))
                 else
-                    map:merge(($mmp, map { "pre-release": [], "build-metadata": [] }))
+                    map:merge(($mmp, map { "pre-release": [] }))
+            return
+                if (not(empty($metadata?identifier)))
+                then
+                    map:merge(($mmppr, map { "build-metadata": array { $metadata?identifier } }))
+                else
+                    map:merge(($mmppr, map { "build-metadata": [] }))
 
 };
 
+(:~
+ : Read a major/minor/patch version number from a set of codepoints
+ :
+ : @param $s the codepoints
+ : @return a map containing the "number" and the "tail", where the tail is any remaining codepoints after the "number".
+ :)
 declare %private function semver:read-version-number($s as xs:integer*) as map(*) {
 	semver:read-version-number($s, ())
 };
 
+(:~
+ : Read a major/minor/patch version number from a set of codepoints
+ :
+ : @param $s the codepoints
+ : @param $accum an accumulator used for self-recursion.
+ : @return a map containing the "number" and the "tail",
+ :     where the tail is any remaining codepoints after the "number".
+ :)
 declare %private function semver:read-version-number($s as xs:integer*, $accum) as map(*) {
-let $head := $s[1]
-let $tail := tail($s)
-return
-    if (empty($head) or $head eq 45 or $head eq 46)	(: 45 is a hyphen, i.e. '-', and 46 is a 'period', i.e. '.' :)
-    then
-    	map {
-    		"number": if(empty($accum))then 0 else xs:integer($accum),
-    		"tail": $tail
-    	}
-    else
-    	    (: 48 is a 'zero', i.e. '0', and 57 is a 'nine' i.e. '9' :)
-	    if ($head ge 48 and $head le 57) then
-	    	   semver:read-version-number($tail, $accum || codepoints-to-string($head))
-	    else
-	    	   (: skip character :)
-	        semver:read-version-number($tail, $accum)
+    let $head := $s[1]
+    let $tail := tail($s)
+    return
+        if (empty($head) or (not(empty($accum)) and $head eq 46) or $head = (43, 45))	(: 43 is a 'Plus Sign', i.e. '+', 45 is a hyphen, i.e. '-', and 46 is a 'period', i.e. '.' :)
+        then
+            map {
+                "number": if(empty($accum))then 0 else xs:integer($accum),
+                "tail": $s
+            }
+        else
+            (: 48 is a 'zero', i.e. '0', and 57 is a 'nine' i.e. '9' :)
+            if ($head ge 48 and $head le 57)
+            then
+                semver:read-version-number($tail, $accum || codepoints-to-string($head))
+            else
+                (: skip character :)
+                semver:read-version-number($tail, $accum)
 };
 
+(:~
+ : Read a pre-release identifier from a set of codepoints
+ :
+ : @param $s the codepoints
+ : @return a map containing a sequence of "identifier" and the "tail",
+ :     where the tail is any remaining codepoints after the "identifier"(s).
+ :)
 declare %private function semver:read-pre-release($s as xs:integer*) as map(*) {
 	semver:read-pre-release($s, ())
 };
 
+(:~
+ : Read a pre-release identifier from a set of codepoints
+ :
+ : @param $s the codepoints
+ : @param $accum an accumulator used for self-recursion.
+ : @return a map containing a sequence of "identifier" and the "tail",
+ :     where the tail is any remaining codepoints after the "identifier"(s).
+ :)
 declare %private function semver:read-pre-release($s as xs:integer*, $accum) as map(*) {
-		let $head := $s[1]
-		let $tail := tail($s)
-		return
-		if (empty($head) or $head eq 43) then  (: 43 is a 'Plus Sign', i.e. '+' :)
-			map {
-		    		"identifier": $accum,
-		    		"tail": $tail
-		    	}
-		else if ($head eq 46)	(: 46 is a 'period', i.e. '.' :)
-		then
-			(: start next identifer :)
-			semver:read-pre-release(subsequence($tail, 2), ($accum, codepoints-to-string($tail[1])))
+    let $head := $s[1]
+    let $tail := tail($s)
+    return
+        if (empty($head) or $head eq 43)  (: 43 is a 'Plus Sign', i.e. '+' :)
+        then
+            map {
+                "identifier": $accum,
+                "tail": $s
+            }
+        else if ($head eq 46)	(: 46 is a 'period', i.e. '.' :)
+        then
+            (: start next identifer :)
+            semver:read-pre-release(subsequence($tail, 2), ($accum, codepoints-to-string($tail[1])))
 
-		(: [0-9A-Za-z-] :)
-		else if (($head ge 48 and $head le 57)
-				or ($head ge 65 and $head le 90)
-				or ($head ge 97 and $head le 122)
-				or $head eq 45) then
-			semver:read-pre-release($tail, $accum[last()] || codepoints-to-string($head))
-		else
-			(: skip character :)
-			semver:read-pre-release($tail, $accum)
-
-
-
+        (: [0-9A-Za-z-] :)
+        else if (($head ge 48 and $head le 57)
+                or ($head ge 65 and $head le 90)
+                or ($head ge 97 and $head le 122)
+                or ($head eq 45 and not(empty($accum))))
+        then
+            semver:read-pre-release($tail, (subsequence($accum, 1, count($accum) - 1), $accum[last()] || codepoints-to-string($head)))
+        else
+            (: skip character :)
+            semver:read-pre-release($tail, $accum)
 };
 
+(:~
+ : Read build metadata identifiers from a set of codepoints
+ :
+ : @param $s the codepoints
+ : @return a map containing a sequence of "identifier" and the "tail",
+ :     where the tail is any remaining codepoints after the "identifier"(s).
+ :)
 declare %private function semver:read-metadata($s as xs:integer*) as map(*) {
-	(: NOTE the process is the same as semver:read-pre-release :)
-	semver:read-pre-release($s, ())
+	semver:read-metadata($s, ())
+};
+
+(:~
+ : Read a build metadata identifiers from a set of codepoints
+ :
+ : @param $s the codepoints
+ : @param $accum an accumulator used for self-recursion.
+ : @return a map containing a sequence of "identifier" and the "tail",
+ :     where the tail is any remaining codepoints after the "identifier"(s).
+ :)
+declare %private function semver:read-metadata($s as xs:integer*, $accum) as map(*) {
+    let $head := $s[1]
+    let $tail := tail($s)
+    return
+        if (empty($head) or (not(empty($accum)) and $head eq 43))  (: 43 is a 'Plus Sign', i.e. '+' :)
+        then
+            map {
+                "identifier": $accum,
+                "tail": $s
+            }
+        else if ($head eq 46)	(: 46 is a 'period', i.e. '.' :)
+        then
+            (: start next identifer :)
+            semver:read-pre-release(subsequence($tail, 2), ($accum, codepoints-to-string($tail[1])))
+
+        (: [0-9A-Za-z-] :)
+        else if (($head ge 48 and $head le 57)
+                or ($head ge 65 and $head le 90)
+                or ($head ge 97 and $head le 122)
+                or ($head eq 45 and not(empty($accum))))
+        then
+            semver:read-pre-release($tail, (subsequence($accum, 1, count($accum) - 1), $accum[last()] || codepoints-to-string($head)))
+        else
+            (: skip character :)
+            semver:read-pre-release($tail, $accum)
 };
 
 (:~ Serialize a SemVer string
