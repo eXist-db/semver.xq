@@ -123,9 +123,7 @@ declare function semver:coerce($version as xs:string?) as map(*) {
         let $major-ver := semver:read-version-number($version)
         let $minor-ver := semver:read-version-number($major-ver?tail)
         let $patch := semver:read-version-number($minor-ver?tail)
-        let $pre-release := semver:read-pre-release(
-          $patch?tail
-        )
+        let $pre-release := semver:read-pre-release($patch?tail)
         let $metadata := semver:read-metadata($pre-release?tail)
         let $mmp := map {
             "major": $major-ver?number,
@@ -139,12 +137,14 @@ declare function semver:coerce($version as xs:string?) as map(*) {
                 else
                     map:merge(($mmp, map { "pre-release": [] }))
             return
-                if (not(empty($metadata?identifier)))
-                then
-                    map:merge(($mmppr, map { "build-metadata": array { $metadata?identifier } }))
-                else
-                    map:merge(($mmppr, map { "build-metadata": [] }))
-
+                let $mmpprbm :=
+                    if (not(empty($metadata?identifier)))
+                    then
+                        map:merge(($mmppr, map { "build-metadata": array { $metadata?identifier } }))
+                    else
+                        map:merge(($mmppr, map { "build-metadata": [] }))
+                return
+                    map:merge(($mmpprbm, map { "identifiers": [ $mmpprbm?major, $mmpprbm?minor, $mmpprbm?patch, $mmpprbm?pre-release, $mmpprbm?build-metadata ] }))
 };
 
 (:~
