@@ -100,11 +100,9 @@ declare function semver:parse($version as xs:string) as map(*) {
             semver:error("regex-error", $version)
 };
 
-(:~ Parse a non-SemVer version string
- :  @param A version string which will be coersed to a Semver compatible version
+(:~ Coerce a non-SemVer version string into SemVer version string and parse it as such
+ :  @param A version string which will be coerced to a SemVer version string
  :  @return A map containing analysis of the parsed version, containing entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
- :  @error regex-error
- :  @error identifier-error
  :)
 declare function semver:coerce($version as xs:string?) as map(*) {
     let $version := string-to-codepoints($version)
@@ -155,13 +153,13 @@ declare %private function semver:read-version-number($s as xs:integer*) as map(*
  :     where the tail is any remaining codepoints after the "number".
  :)
 declare %private function semver:read-version-number($s as xs:integer*, $accum) as map(*) {
-    let $head := $s[1]
+    let $head := head($s)
     let $tail := tail($s)
     return
         if (empty($head) or (not(empty($accum)) and $head eq 46) or $head = (43, 45))	(: 43 is a 'Plus Sign', i.e. '+', 45 is a hyphen, i.e. '-', and 46 is a 'period', i.e. '.' :)
         then
             map {
-                "number": if(empty($accum))then 0 else xs:integer($accum),
+                "number": if (empty($accum)) then 0 else xs:integer($accum),
                 "tail": $s
             }
         else
@@ -194,7 +192,7 @@ declare %private function semver:read-pre-release($s as xs:integer*) as map(*) {
  :     where the tail is any remaining codepoints after the "identifier"(s).
  :)
 declare %private function semver:read-pre-release($s as xs:integer*, $accum) as map(*) {
-    let $head := $s[1]
+    let $head := head($s)
     let $tail := tail($s)
     return
         if (empty($head) or $head eq 43)  (: 43 is a 'Plus Sign', i.e. '+' :)
@@ -240,7 +238,7 @@ declare %private function semver:read-metadata($s as xs:integer*) as map(*) {
  :     where the tail is any remaining codepoints after the "identifier"(s).
  :)
 declare %private function semver:read-metadata($s as xs:integer*, $accum) as map(*) {
-    let $head := $s[1]
+    let $head := head($s)
     let $tail := tail($s)
     return
         if (empty($head) or (not(empty($accum)) and $head eq 43))  (: 43 is a 'Plus Sign', i.e. '+' :)
