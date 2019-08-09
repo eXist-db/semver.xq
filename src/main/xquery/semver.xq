@@ -60,13 +60,24 @@ declare function semver:validate($version as xs:string) as xs:boolean {
     }
 };
 
-(:~ Parse a SemVer version string
+(:~ Parse a SemVer version string (strictly)
  :  @param A version string
  :  @return A map containing analysis of the parsed version, containing entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
  :  @error regex-error
  :  @error identifier-error
  :)
 declare function semver:parse($version as xs:string) as map(*) {
+    semver:parse($version, false())
+};
+
+(:~ Parse a SemVer version string (with an option to coerce invalid SemVer strings)
+ :  @param A version string
+ :  @param An option for coercing non-SemVer version strings into parsable form
+ :  @return A map containing analysis of the parsed version, containing entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
+ :  @error regex-error
+ :  @error identifier-error
+ :)
+declare function semver:parse($version as xs:string, $coerce as xs:boolean) as map(*) {
     (: run the version against the standard SemVer regex :)
     let $analysis := analyze-string($version, $semver:regex)
     let $groups := $analysis/fn:match/fn:group
@@ -96,6 +107,8 @@ declare function semver:parse($version as xs:string) as map(*) {
             } catch * {
                 semver:error("identifier-error", $version)
             }
+        else if ($coerce) then 
+            semver:coerce($version)
         else
             semver:error("regex-error", $version)
 };
@@ -294,44 +307,91 @@ declare function semver:serialize($version as map(*)) {
     semver:serialize($version?major, $version?minor, $version?patch, $version?pre-release, $version?build-metadata)
 };
 
-(:~ Compare two versions
+(:~ Compare two versions (strictly)
  :  @param A version string
  :  @param A second version string
  :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
  :)
 declare function semver:compare($v1 as xs:string, $v2 as xs:string) as xs:integer {
-    let $parsed-v1 := semver:parse($v1)
-    let $parsed-v2 := semver:parse($v2)
+    semver:compare($parsed-v1, $parsed-v2, false())
+};
+
+(:~ Compare two versions (with an option to coerce invalid SemVer strings)
+ :  @param A version string
+ :  @param A second version string
+ :  @param An option for coercing non-SemVer version strings into parsable form
+ :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
+ :)
+declare function semver:compare($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:integer {
+    let $parsed-v1 := semver:parse($v1, $coerce)
+    let $parsed-v2 := semver:parse($v2, $coerce)
     return
         semver:compare-parsed($parsed-v1, $parsed-v2)
 };
 
-
-(:~ Test if v1 is a lower version than v2
+(:~ Test if v1 is a lower version than v2 (strictly)
  :  @param A version string
  :  @param A second version string
  :  @return true if v1 is less than v2
  :)
 declare function semver:lt($v1 as xs:string, $v2 as xs:string) as xs:boolean {
-    semver:compare($v1, $v2) eq -1
+    semver:lt($v1, $v2, false())
 };
 
-(:~ Test if v1 is a lower version or the same version as v2
+(:~ Test if v1 is a lower version than v2 (with an option to coerce invalid SemVer strings)
+ :  @param A version string
+ :  @param A second version string
+ :  @param An option for coercing non-SemVer version strings into parsable form
+ :  @return true if v1 is less than v2
+ :)
+declare function semver:lt($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
+    semver:compare($v1, $v2, $coerce) eq -1
+};
+
+(:~ Test if v1 is a lower version or the same version as v2 (strictly)
  :  @param A version string
  :  @param A second version string
  :  @return true if v1 is less than or equal to v2
  :)
 declare function semver:le($v1 as xs:string, $v2 as xs:string) as xs:boolean {
-    semver:compare($v1, $v2) = (-1, 0)
+    semver:le($v1, $v2, false())
 };
 
-(:~ Test if v1 is a higher version than v2
+(:~ Test if v1 is a lower version or the same version as v2 (with an option to coerce invalid SemVer strings)
+ :  @param A version string
+ :  @param A second version string
+ :  @param An option for coercing non-SemVer version strings into parsable form
+ :  @return true if v1 is less than or equal to v2
+ :)
+declare function semver:le($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
+    semver:compare($v1, $v2, $coerce) = (-1, 0)
+};
+
+(:~ Test if v1 is a higher version than v2 (strictly)
  :  @param A version string
  :  @param A second version string
  :  @return true if v1 is greater than v2
  :)
 declare function semver:gt($v1 as xs:string, $v2 as xs:string) as xs:boolean {
-    semver:compare($v1, $v2) eq 1
+    semver:gt($v1, $v2, false())
+};
+
+(:~ Test if v1 is a higher version than v2 (with an option to coerce invalid SemVer strings)
+ :  @param A version string
+ :  @param A second version string
+ :  @return true if v1 is greater than v2
+ :)
+declare function semver:gt($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
+    semver:compare($v1, $v2, $coerce) eq 1
+};
+
+(:~ Test if v1 is the same or higher version than v2 (strictly)
+ :  @param A version string
+ :  @param A second version string
+ :  @return true if v1 is greater than or equal to v2
+ :)
+declare function semver:ge($v1 as xs:string, $v2 as xs:string) as xs:boolean {
+    semver:ge($v1, $v2, false())
 };
 
 (:~ Test if v1 is the same or higher version than v2
@@ -339,8 +399,8 @@ declare function semver:gt($v1 as xs:string, $v2 as xs:string) as xs:boolean {
  :  @param A second version string
  :  @return true if v1 is greater than or equal to v2
  :)
-declare function semver:ge($v1 as xs:string, $v2 as xs:string) as xs:boolean {
-    semver:compare($v1, $v2) = (1, 0)
+declare function semver:ge($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
+    semver:compare($v1, $v2, $coerce) = (1, 0)
 };
 
 (:~ Test if v1 is equal to v2
@@ -352,21 +412,41 @@ declare function semver:eq($v1 as xs:string, $v2 as xs:string) as xs:boolean {
     semver:compare($v1, $v2) eq 0
 };
 
-(:~ Test if v1 is not equal to v2
+(:~ Test if v1 is not equal to v2 (strictly)
  :  @param A version string
  :  @param A second version string
  :  @return true if v1 is not equal to v2
  :)
 declare function semver:ne($v1 as xs:string, $v2 as xs:string) as xs:boolean {
-    semver:compare($v1, $v2) ne 0
+    semver:ne($v1, $v2, false())
 };
 
-(:~ Sort SemVer strings
+(:~ Test if v1 is not equal to v2 (with an option to coerce invalid SemVer strings)
+ :  @param A version string
+ :  @param A second version string
+ :  @param An option for coercing non-SemVer version strings into parsable form
+ :  @return true if v1 is not equal to v2
+ :)
+declare function semver:ne($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
+    semver:compare($v1, $v2, $coerce) ne 0
+};
+
+
+(:~ Sort SemVer strings (strictly)
  :  @param A sequence of version strings
  :  @return A sequence of sorted version strings
  :)
 declare function semver:sort($versions as xs:string+) as xs:string+ {
-    let $parsed := $versions ! semver:parse(.)
+    semver:sort($versions, false())
+};
+
+(:~ Sort SemVer strings (with an option to coerce invalid SemVer strings)
+ :  @param A sequence of version strings
+ :  @param An option for coercing non-SemVer version strings into parsable form
+ :  @return A sequence of sorted version strings
+ :)
+declare function semver:sort($versions as xs:string+, $coerce as xs:boolean) as xs:string+ {
+    let $parsed := $versions ! semver:parse(., $coerce)
     (: First, sort versions by major, minor, and patch (using fast standard sort) :)
     let $release-sorted := sort($parsed, (), function($p) { $p?major, $p?minor, $p?patch } )
     (: Second, sort any versions with pre-release fields :)
