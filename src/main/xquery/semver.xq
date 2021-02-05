@@ -40,6 +40,9 @@ xquery version "3.1";
 
 module namespace semver = "http://exist-db.org/xquery/semver";
 
+declare namespace array="http://www.w3.org/2005/xpath-functions/array";
+declare namespace map="http://www.w3.org/2005/xpath-functions/map";
+
 (:~ A regular expression for checking a SemVer version string
  :  @author David Fichtmueller
  :  @see https://github.com/semver/semver/pull/460
