@@ -313,7 +313,10 @@ declare function semver:serialize($version as map(*)) {
  :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
  :)
 declare function semver:compare($v1 as xs:string, $v2 as xs:string) as xs:integer {
-    semver:compare($parsed-v1, $parsed-v2, false())
+    let $parsed-v1 := semver:parse($v1)
+    let $parsed-v2 := semver:parse($v2)
+    return
+        semver:compare-parsed($parsed-v1, $parsed-v2)
 };
 
 (:~ Compare two versions (with an option to coerce invalid SemVer strings)
