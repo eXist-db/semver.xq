@@ -40,6 +40,9 @@ xquery version "3.1";
 
 module namespace semver = "http://exist-db.org/xquery/semver";
 
+declare namespace array="http://www.w3.org/2005/xpath-functions/array";
+declare namespace map="http://www.w3.org/2005/xpath-functions/map";
+
 (:~ A regular expression for checking a SemVer version string
  :  @author David Fichtmueller
  :  @see https://github.com/semver/semver/pull/460
@@ -313,7 +316,10 @@ declare function semver:serialize($version as map(*)) {
  :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
  :)
 declare function semver:compare($v1 as xs:string, $v2 as xs:string) as xs:integer {
-    semver:compare($parsed-v1, $parsed-v2, false())
+    let $parsed-v1 := semver:parse($v1)
+    let $parsed-v2 := semver:parse($v2)
+    return
+        semver:compare-parsed($parsed-v1, $parsed-v2)
 };
 
 (:~ Compare two versions (with an option to coerce invalid SemVer strings)

@@ -39,7 +39,7 @@
             <namespace>http://exist-db.org/xquery/semver</namespace>
             <directory>${basedir}/src/main/xquery</directory>
             <includes>
-                <include>semver.xq</include>
+                <include>semver.xqm</include>
             </includes>
             <outputDirectory>content</outputDirectory>
         </xquerySet>

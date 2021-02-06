@@ -28,7 +28,7 @@ xquery version "3.1";
 
 module namespace stco = "http://exist-db.org/xquery/semver/test/coerce";
 
-import module namespace semver = "http://exist-db.org/xquery/semver" at "file:///Users/aretter/code/semver.xq/src/main/xquery/semver.xq";
+import module namespace semver = "http://exist-db.org/xquery/semver";
 
 declare namespace test = "http://exist-db.org/xquery/xqsuite";
 

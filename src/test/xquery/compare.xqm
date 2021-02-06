@@ -68,7 +68,37 @@ function stc:lt-pre-release-dot() {
 };
 
 declare
-	%test:assertEquals("false")
+	%test:assertEquals("true")
 function stc:gt() {
-	semver:lt("2.0.0", "1.0.0")
+	semver:gt("2.0.0", "1.0.0")
+};
+
+declare
+	%test:assertEquals("true")
+function stc:eq() {
+	semver:eq("1.0.0", "1.0.0")
+};
+
+declare
+	%test:assertEquals("true")
+function stc:ne() {
+	semver:ne("1.0.0", "2.0.0")
+};
+
+declare
+	%test:assertEquals("0")
+function stc:compare-eq() {
+	semver:compare("1.0.0", "1.0.0")
+};
+
+declare
+	%test:assertEquals("1")
+function stc:compare-gt() {
+	semver:compare("2.0.0", "1.0.0")
+};
+
+declare
+	%test:assertEquals("-1")
+function stc:compare-lt() {
+	semver:compare("1.0.0", "2.0.0")
 };
