@@ -38,7 +38,7 @@ declare
 	    "1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta",
 	    "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11",
 	    "1.0.0-rc.1", "1.0.0", "2.0.0", "2.1.0", "2.1.1")
-function sts:order() {
+function sts:sort() {
 	let $versions :=
 	(
         "1.0.0", "2.0.0", "2.1.0", "2.1.1", "1.0.0-alpha", "1.0.0-alpha.1",
@@ -46,3 +46,29 @@ function sts:order() {
     ) return
         semver:sort($versions)
 };
+
+declare
+	%test:assertEquals(
+	    "1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta",
+	    "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11",
+	    "1.0.0-rc.1", "1.0.0", "2.0.0", "2.1.0", "2.1.1")
+function sts:sort-items() {
+	let $packages :=
+    	<packages>
+            <package version="1.0.0"/>
+            <package version="2.0.0"/>
+            <package version="2.1.0"/>
+            <package version="2.1.1"/>
+            <package version="1.0.0-alpha"/>
+            <package version="1.0.0-alpha.1"/>
+            <package version="1.0.0-alpha.beta"/>
+            <package version="1.0.0-beta"/>
+            <package version="1.0.0-beta.11"/>
+            <package version="1.0.0-beta.2"/>
+            <package version="1.0.0-rc.1"/>
+        </packages>
+    return
+        semver:sort($packages/package, function($item) { $item/@version }, true()) ! 
+            ./@version/string()
+};
+
