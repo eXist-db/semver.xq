@@ -482,6 +482,25 @@ declare function semver:sort($versions as xs:string+, $coerce as xs:boolean) as 
         semver:serialize($version)
 };
 
+(:~ Sort arbitrary items by their SemVer strings (with an option to coerce invalid SemVer strings)
+ :  @param A sequence of items to sort
+ :  @param A function taking a single parameter used to derive a SemVer string from the item
+ :  @param An option for coercing non-SemVer version strings into parsable form
+ :  @return The sequence of items in SemVer order
+ :)
+declare function semver:sort($items as item()*, $function as function(*), $coerce as xs:boolean) as item()* {
+    let $items-with-verison := 
+        $items !
+            map { 
+                "item": .,
+                "version": $function(.)
+            }
+    let $sorted-versions := semver:sort($items-with-verison?version, $coerce)
+    for $version in $sorted-versions
+    return
+        $items-with-verison[?version eq $version]?item
+};
+
 (:~ Sort pre-release fields
  :  @param The versions to sort
  :  @param An accumulator for sorted versions
