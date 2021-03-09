@@ -55,6 +55,11 @@
     
     <!-- changelog - maintained manually, for the package repository -->
     <changelog>
+        <change xmlns="http://exist-db.org/xquery/repo" version="2.3.0">
+            <ul xmlns="http://www.w3.org/1999/xhtml">
+                <li>New: Added a function for sorting arbitrary items, semver:sort#3 - <a href="https://github.com/eXist-db/semver.xq/pull/5">#5</a>.</li>
+            </ul>
+        </change>
         <change xmlns="http://exist-db.org/xquery/repo" version="2.2.2">
             <ul xmlns="http://www.w3.org/1999/xhtml">
                 <li>Fix: Fixed a bug in semver:compare - <a href="https://github.com/eXist-db/semver.xq/pull/3">#3</a>.</li>
