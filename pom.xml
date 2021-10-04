@@ -77,6 +77,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- required at XQSuite test runtime -->
+            <groupId>org.exist-db</groupId>
+            <artifactId>exist-optional</artifactId>
+            <version>${exist.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
@@ -124,6 +131,17 @@
             </resource>
         </resources>
 
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources-filtered</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+
         <plugins>
             <plugin>
                 <groupId>com.mycila</groupId>
@@ -147,6 +165,9 @@
                         </goals>
                         <configuration>
                             <failOnWarning>true</failOnWarning>
+                            <ignoredUnusedDeclaredDependencies>
+                                <ignoredUnusedDeclaredDependency>org.exist-db:exist-optional</ignoredUnusedDeclaredDependency>
+                            </ignoredUnusedDeclaredDependencies>
                         </configuration>
                     </execution>
                 </executions>
