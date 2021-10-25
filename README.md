@@ -1,5 +1,7 @@
 # semver.xq
 
+[![CI](https://github.com/eXist-db/semver.xq/workflows/CI/badge.svg)](https://github.com/eXist-db/semver.xq/actions?query=workflow%3ACI)
+
 Validate, compare, sort, parse, and serialize Semantic Versioning (SemVer) 2.0.0 version strings, using XQuery.
 
 SemVer rules are applied strictly, raising errors when version strings do not conform to the spec. 
