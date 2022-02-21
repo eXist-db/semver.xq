@@ -41,9 +41,8 @@ module namespace semver = "http://exist-db.org/xquery/semver";
 declare namespace array="http://www.w3.org/2005/xpath-functions/array";
 declare namespace map="http://www.w3.org/2005/xpath-functions/map";
 
-(:~ A regular expression for checking a SemVer version string
- :  @author David Fichtmueller
- :  @see https://github.com/semver/semver/pull/460
+(:~ A regular expression for checking a SemVer version string 
+ : @see https://semver.org/spec/v2.0.0.html#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
  :)
 declare variable $semver:regex := "^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
 
