@@ -34,7 +34,6 @@ xquery version "3.1";
  :
  :  @author Joe Wicentowski
  :  @see https://semver.org/spec/v2.0.0.html
- :  @see https://gist.github.com/joewiz/b349e2853a17bf817e5d0013d01fa9f9
  :)
 
 module namespace semver = "http://exist-db.org/xquery/semver";
