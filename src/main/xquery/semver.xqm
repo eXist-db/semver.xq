@@ -33,7 +33,6 @@ xquery version "3.1";
  :  not conform to the spec.
  :
  :  @author Joe Wicentowski
- :  @version 2.2.2
  :  @see https://semver.org/spec/v2.0.0.html
  :  @see https://gist.github.com/joewiz/b349e2853a17bf817e5d0013d01fa9f9
  :)
