@@ -316,6 +316,121 @@
             </dependencies>
         </profile>
 
+        <profile>
+            <!--
+                Profile for rapid development and/or manual testing.
+
+                Simply run: `mvn -Pdev docker:start` to start a Docker environment of eXist-db on port 9090
+                with the semver.xq package already deployed.
+
+                As the Docker environment binds the files from the host filesystem, changes to the source code
+                are reflected immediately in the running eXist-db environment.
+
+                You can override the Docker host port for eXist-db from port 9090 to a port of your choosing by
+                specifying `-Ddev.port=9191`, e.g.: `mvn -Pdev -Ddev.port=9191 docker:start`.
+
+                If you also want the Dashboard and eXide to be available from the Docker environment of eXist-db
+                you can invoke the target `public-xar-repo:resolve` before you call `docker:start`,
+                e.g. `mvn -Pdev public-xar-repo:resolve docker:start`.
+
+                To stop the Docker environment run: `mvn -Pdev docker:stop`.
+            -->
+            <id>dev</id>
+            <properties>
+                <exist.version>6.1.0-SNAPSHOT</exist.version>
+                <dev.port>9090</dev.port>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.exist-db.maven.plugins</groupId>
+                        <artifactId>public-xar-repo-plugin</artifactId>
+                        <version>1.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>fetch-3rd-party-xars</id>
+                                <goals>
+                                    <goal>resolve</goal>
+                                </goals>
+                                <configuration>
+                                    <repoUri>https://exist-db.org/exist/apps/public-repo</repoUri>
+                                    <outputDirectory>${project.build.directory}/3rd-party-xars</outputDirectory>
+                                    <existDbVersion>${project.version}</existDbVersion>
+                                    <packages>
+                                        <package>
+                                            <abbrev>dashboard</abbrev>
+                                        </package>
+                                        <package>
+                                            <abbrev>eXide</abbrev>
+                                        </package>
+                                        <package>
+                                            <abbrev>functx</abbrev>
+                                        </package>
+                                    </packages>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.40.3</version>
+                        <configuration>
+                            <skip>${skipTests}</skip>
+                            <startParallel>true</startParallel>
+                            <verbose>true</verbose>
+                            <images>
+                                <image>
+                                    <alias>existdb-semver-xq</alias>
+                                    <name>existdb/existdb:${exist.version}</name>
+                                    <run>
+                                        <ports>
+                                            <port>${dev.port}:8080</port>
+                                        </ports>
+                                        <volumes>
+                                            <bind>
+                                                <volume>${project.build.testOutputDirectory}/.expath-pkg:/exist/data/expathrepo/.expath-pkg</volume>
+                                                <volume>${project.build.outputDirectory}/icon.png:/exist/data/expathrepo/semver-xq-${project.version}/icon.png</volume>
+                                                <volume>${project.build.directory}/expath-descriptors/cxan.xml:/exist/data/expathrepo/semver-xq-${project.version}/cxan.xml</volume>
+                                                <volume>${project.build.directory}/expath-descriptors/exist.xml:/exist/data/expathrepo/semver-xq-${project.version}/exist.xml</volume>
+                                                <volume>${project.build.directory}/expath-descriptors/expath-pkg.xml:/exist/data/expathrepo/semver-xq-${project.version}/expath-pkg.xml</volume>
+                                                <volume>${project.build.directory}/expath-descriptors/repo.xml:/exist/data/expathrepo/semver-xq-${project.version}/repo.xml</volume>
+                                                <volume>${project.basedir}/LICENSE:/exist/data/expathrepo/semver-xq-${project.version}/LICENSE</volume>
+                                                <volume>${project.basedir}/README.md:/exist/data/expathrepo/semver-xq-${project.version}/README.md</volume>
+                                                <volume>${project.basedir}/src/main/xquery:/exist/data/expathrepo/semver-xq-${project.version}/content</volume>
+
+                                                <volume>${project.build.directory}/3rd-party-xars:/exist/autodeploy</volume>
+                                            </bind>
+                                        </volumes>
+                                        <wait>
+                                            <log>Server has started, listening on</log>
+                                            <time>120000</time>
+                                        </wait>
+                                        <autoRemove>true</autoRemove>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>docker-semver-xq-start</id>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>docker-semver-xq-stop</id>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
     </profiles>
 
 </project>

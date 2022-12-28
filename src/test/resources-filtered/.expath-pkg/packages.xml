@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?><packages xmlns="http://expath.org/ns/repo/packages">
+<package version="${project.version}" dir="semver-xq-${project.version}" name="http://exist-db.org/xquery/semver-xq"/>
+</packages>
