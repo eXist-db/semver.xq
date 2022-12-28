@@ -454,9 +454,9 @@ declare function semver:sort($versions as xs:string+) as xs:string+ {
 declare function semver:sort($versions as xs:string+, $coerce as xs:boolean) as xs:string+ {
     let $parsed := $versions ! semver:parse(., $coerce)
     let $sorted := semver:sort-parsed($parsed)
-    let $serialized := $sorted ! semver:serialize(.)
+    for $s in $sorted
     return
-         $serialized
+        semver:serialize($s)
 };
 
 (:~ Sort arbitrary items by their SemVer strings (with an option to coerce invalid SemVer strings)
@@ -478,8 +478,10 @@ declare function semver:sort($items as item()*, $function as function(*), $coerc
                 }
     let $sorted-versions := semver:sort-parsed($items-with-version?parsed-version)
     for $sorted-version in $sorted-versions
+    for $item-with-version in $items-with-version
+    where semver:compare-parsed($item-with-version?parsed-version, $sorted-version) eq 0
     return
-        $items-with-version[fn:deep-equal(?parsed-version, $sorted-version)]?item
+        $item-with-version?item
 };
 
 (:~ Sort SemVer maps
