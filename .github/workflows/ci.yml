@@ -2,12 +2,13 @@ name: CI
 on: [push, pull_request]
 jobs:
   build:
-    name: Build and Test (${{ matrix.os }} / OpenJDK ${{ matrix.jdk }})
+    name: Build and Test (${{ matrix.os }} / JDK ${{ matrix.jdk }} / eXist-db ${{ matrix.exist-version }})
     strategy:
       fail-fast: true
       matrix:
         jdk: ['8', '11']
         os: [ubuntu-latest]
+        exist-version: ['4', '5']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +22,15 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-      - name: Maven Build
+      - name: Maven Build (eXist-db 4.x.x)
         run: mvn clean package -DskipTests
-      - name: Test
+        if: ${{ matrix.exist-version == '4' }}
+      - name: Maven Build (eXist-db 5.x.x)
+        run: mvn clean package -DskipTests -Pexistdb-5-or-newer
+        if: ${{ matrix.exist-version == '5' }}
+      - name: Test (eXist-db 4.x.x)
         run: mvn verify
+        if: ${{ matrix.exist-version == '4' }}
+      - name: Test (eXist-db 5.x.x)
+        run: mvn verify -Pexistdb-5-or-newer
+        if: ${{ matrix.exist-version == '5' }}
