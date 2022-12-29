@@ -1,8 +1,8 @@
-name: CI
+name: CI semver.xq
 on: [push, pull_request]
 jobs:
   build:
-    name: Build and Test (${{ matrix.os }} / JDK ${{ matrix.jdk }} / eXist-db ${{ matrix.exist-version }})
+    name: Build and Test Semver.xq (${{ matrix.os }} / JDK ${{ matrix.jdk }} / eXist-db ${{ matrix.exist-version }})
     strategy:
       fail-fast: true
       matrix:
