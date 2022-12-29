@@ -407,7 +407,6 @@
                                             <log>Server has started, listening on</log>
                                             <time>120000</time>
                                         </wait>
-                                        <autoRemove>true</autoRemove>
                                     </run>
                                 </image>
                             </images>
