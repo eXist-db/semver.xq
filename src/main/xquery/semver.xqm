@@ -141,7 +141,6 @@ declare function semver:parse($version as xs:string) as map(*) {
  :  @error identifier-error
  :)
 declare function semver:parse($version as xs:string, $coerce as xs:boolean) as map(*) {
-    (: run the version against the standard SemVer regex :)
     let $analysis := analyze-string($version, $semver:regex)
     let $groups := $analysis/fn:match/fn:group
     return
