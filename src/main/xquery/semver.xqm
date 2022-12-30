@@ -67,13 +67,7 @@ declare variable $semver:regex :=
  :  @return True if the version is valid, false if not
  :)
 declare function semver:validate($version as xs:string) as xs:boolean {
-    try {
-        let $parsed := semver:parse($version)
-        return
-            true()
-    } catch * {
-        false()
-    }
+    matches($version, $semver:regex)
 };
 
 (:~ Parse a SemVer version string (strictly)
