@@ -528,12 +528,12 @@ declare %private function semver:error($code as xs:string, $version as xs:string
         map {
             "regex-error":
                 map {
-                    "description": "Version did not match regex for valid semver",
+                    "description": "Version did not match the regular expression for valid SemVer",
                     "qname": QName("http://joewiz.org/ns/xquery/semver", "regex-error")
                 },
             "identifier-error":
                 map {
-                    "description": "Version identifiers did not conform to semver spec",
+                    "description": "Version identifiers did not conform to SemVer spec",
                     "qname": QName("http://joewiz.org/ns/xquery/semver", "identifier-error")
                 }
         }
