@@ -41,10 +41,26 @@ module namespace semver = "http://exist-db.org/xquery/semver";
 declare namespace array="http://www.w3.org/2005/xpath-functions/array";
 declare namespace map="http://www.w3.org/2005/xpath-functions/map";
 
-(:~ A regular expression for checking a SemVer version string 
- : @see https://semver.org/spec/v2.0.0.html#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+(:~ A regular expression for validating SemVer strings and parsing valid SemVer strings
+ :  
+ :  @see https://semver.org/spec/v2.0.0.html#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
  :)
-declare variable $semver:regex := "^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$";
+declare variable $semver:regex :=
+    (: Start of string:)
+    "^"
+    (: Major version: A zero for initial development or a non-negative integer without leading zeros :)
+    || "(0|[1-9]\d*)"
+    (: `.` + Minor version: A zero or a non-negative integer without leading zeros :)
+    || "\.(0|[1-9]\d*)"
+    (: `.` + Patch version: A zero or a non-negative integer without leading zeros :)
+    || "\.(0|[1-9]\d*)"
+    (: `-` + Pre-release metadata (optional): A series of dot separated, non-empty identifiers, comprised only of ASCII alphanumerics and hyphens [0-9A-Za-z-] :)
+    || "(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
+    (: `+` + Build metadata (optional): A series of dot separated, non-empty identifiers, comprised only of ASCII alphanumerics and hyphens [0-9A-Za-z-] :)
+    || "(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
+    (: End of string :)
+    || "$"
+;
 
 (:~ Validate whether a SemVer string conforms to the spec
  :  @param A version string
