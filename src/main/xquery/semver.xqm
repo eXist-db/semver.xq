@@ -179,10 +179,10 @@ declare function semver:serialize($major as xs:integer, $minor as xs:integer, $p
     let $pre-release := string-join($pre-release ! string(.), ".")
     let $build-metadata := string-join($build-metadata ! string(.), ".")
     let $candidate :=
-        $release ||
-        (if ($pre-release) then "-" || $pre-release else ()) ||
-        (if ($build-metadata) then "+" || $build-metadata else ())
-    (: raise an error if the candidate is invalid :)
+        $release
+        || (if ($pre-release) then "-" || $pre-release else ())
+        || (if ($build-metadata) then "+" || $build-metadata else ())
+    (: Raise an error if the candidate is invalid :)
     let $check := semver:parse($candidate)
     return
         $candidate
