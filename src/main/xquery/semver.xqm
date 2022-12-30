@@ -217,6 +217,38 @@ declare function semver:compare($v1 as xs:string, $v2 as xs:string, $coerce as x
         semver:compare-parsed($parsed-v1, $parsed-v2)
 };
 
+(:~ Compare two parsed SemVer versions
+ :  
+ :  @param $v1 A map containing analysis of a version string
+ :  @param $v2 A map containing analysis of a second version string
+ :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
+ :)
+declare function semver:compare-parsed($v1 as map(*), $v2 as map(*)) as xs:integer {
+    (: Compare major, minor, and patch identifiers :)
+    let $release-comparison :=
+        semver:compare-release(
+            array:subarray($v1?identifiers, 1, 3),
+            array:subarray($v2?identifiers, 1, 3)
+        )
+    return
+        switch ($release-comparison)
+            case 0 return
+                (: When major, minor, and patch are equal, a pre-release version has lower precedence than a normal version. :)
+                if (array:size($v1?pre-release) eq 0 and array:size($v2?pre-release) gt 0) then
+                    1
+                else if (array:size($v1?pre-release) gt 0 and array:size($v2?pre-release) eq 0) then
+                    -1
+                else
+                    (: When major, minor, and patch are equal, compare pre-release :)
+                    (: Build metadata SHOULD be ignored when determining version precedence. :)
+                    semver:compare-pre-release(
+                        $v1?pre-release,
+                        $v2?pre-release
+                    )
+            default return
+                $release-comparison
+};
+
 (:~ Test if v1 is a lower version than v2 (strictly)
  :  @param A version string
  :  @param A second version string
@@ -319,6 +351,55 @@ declare function semver:ne($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
     semver:compare($v1, $v2, $coerce) ne 0
 };
 
+(:~ Compare release identifiers
+ :  
+ :  @param $v1 An array of release identifiers
+ :  @param $v2 A second array of release identifiers
+ :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
+ :)
+declare %private function semver:compare-release($v1 as array(*), $v2 as array(*)) {
+    (: No (more) pairs to compare, so the release portions of the two versions are of equal precedence :)
+    if (array:size($v1) eq 0 and array:size($v2) eq 0) then
+        0
+    (: Compare members using numeric operators :)
+    else if (array:head($v1) lt array:head($v2)) then
+        -1
+    else if (array:head($v1) gt array:head($v2)) then
+        1
+    else
+        semver:compare-release(array:tail($v1), array:tail($v2))
+};
+
+(:~ Compare pre-release identifiers
+ :  
+ :  @param $v1 An array of pre-release identifiers
+ :  @param $v2 A second array of pre-release identifiers
+ :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
+ :)
+declare %private function semver:compare-pre-release($v1 as array(*), $v2 as array(*)) {
+    (: No (more) pairs to compare, so the two versions are of equal precedence :)
+    if (array:size($v1) eq 0 and array:size($v2) eq 0) then
+        0
+    (: A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. :)
+    else if (array:size($v1) eq 0) then
+        -1
+    else if (array:size($v2) eq 0) then
+        1
+    (: Numeric identifiers always have lower precedence than non-numeric identifiers. :)
+    else if (array:head($v1) instance of xs:string and array:head($v2) instance of xs:integer) then
+        1
+    else if (array:head($v1) instance of xs:integer and array:head($v2) instance of xs:string) then
+        -1
+    (: Compare values using comparison operators :)
+    else if (array:head($v1) lt array:head($v2)) then
+        -1
+    else if (array:head($v1) gt array:head($v2)) then
+        1
+    (: These identifiers are equal, so recurse to the next pair of identifiers :)
+    else
+        semver:compare-pre-release(array:tail($v1), array:tail($v2))
+};
+
 
 (:~ Sort SemVer strings (strictly)
  :  @param $versions A sequence of version strings
@@ -414,74 +495,6 @@ declare %private function semver:sort-pre-release($parsed-versions as map(*)*, $
                 semver:sort-pre-release(($rest, $head), $sorted-versions)
     else
         $sorted-versions
-};
-
-(:~ Compare two parsed SemVer versions
- :  @param A map containing analysis of a version string
- :  @param A map containing analysis of a second version string
- :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
- :)
-declare %private function semver:compare-parsed($v1 as map(*), $v2 as map(*)) as xs:integer {
-    (: Compare major, minor, and patch identifiers :)
-    let $release-comparison :=
-        semver:compare-release(
-            array:subarray($v1?identifiers, 1, 3),
-            array:subarray($v2?identifiers, 1, 3)
-        )
-    return
-        switch ($release-comparison)
-            case 0 return
-                (: When major, minor, and patch are equal, a pre-release version has lower precedence than a normal version. :)
-                if (array:size($v1?pre-release) eq 0 and array:size($v2?pre-release) gt 0) then
-                    1
-                else if (array:size($v1?pre-release) gt 0 and array:size($v2?pre-release) eq 0) then
-                    -1
-                else
-                    (: When major, minor, and patch are equal, compare pre-release :)
-                    (: Build metadata SHOULD be ignored when determining version precedence. :)
-                    semver:compare-pre-release(
-                        $v1?pre-release,
-                        $v2?pre-release
-                    )
-            default return
-                $release-comparison
-};
-
-declare %private function semver:compare-release($v1 as array(*), $v2 as array(*)) {
-    (: No (more) pairs to compare, so the release portions of the two versions are of equal precedence :)
-    if (array:size($v1) eq 0 and array:size($v2) eq 0) then
-        0
-    (: Compare members using numeric operators :)
-    else if (array:head($v1) lt array:head($v2)) then
-        -1
-    else if (array:head($v1) gt array:head($v2)) then
-        1
-    else
-        semver:compare-release(array:tail($v1), array:tail($v2))
-};
-
-declare %private function semver:compare-pre-release($v1 as array(*), $v2 as array(*)) {
-    (: No (more) pairs to compare, so the two versions are of equal precedence :)
-    if (array:size($v1) eq 0 and array:size($v2) eq 0) then
-        0
-    (: A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. :)
-    else if (array:size($v1) eq 0) then
-        -1
-    else if (array:size($v2) eq 0) then
-        1
-    (: Numeric identifiers always have lower precedence than non-numeric identifiers. :)
-    else if (array:head($v1) instance of xs:string and array:head($v2) instance of xs:integer) then
-        1
-    else if (array:head($v1) instance of xs:integer and array:head($v2) instance of xs:string) then
-        -1
-    (: Compare values using comparison operators :)
-    else if (array:head($v1) lt array:head($v2)) then
-        -1
-    else if (array:head($v1) gt array:head($v2)) then
-        1
-    (: These identifiers are equal, so recurse to the next pair of identifiers :)
-    else
-        semver:compare-pre-release(array:tail($v1), array:tail($v2))
 };
 
 (:~ Raise a descriptive error
