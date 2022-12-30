@@ -295,7 +295,7 @@ declare function semver:le($v1 as xs:string, $v2 as xs:string) as xs:boolean {
  :  @return true if v1 is less than or equal to v2
  :)
 declare function semver:le($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
-    semver:compare($v1, $v2, $coerce) = (-1, 0)
+    semver:compare($v1, $v2, $coerce) le 0
 };
 
 (:~ Test if v1 is a higher version than v2 (strictly)
@@ -334,7 +334,7 @@ declare function semver:ge($v1 as xs:string, $v2 as xs:string) as xs:boolean {
  :  @return true if v1 is greater than or equal to v2
  :)
 declare function semver:ge($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
-    semver:compare($v1, $v2, $coerce) = (1, 0)
+    semver:compare($v1, $v2, $coerce) ge 0
 };
 
 (:~ Test if v1 is equal to v2 (strictly)
