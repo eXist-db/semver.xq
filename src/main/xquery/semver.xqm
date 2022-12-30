@@ -109,46 +109,25 @@ declare function semver:parse($version as xs:string, $coerce as xs:boolean) as m
     let $analysis := analyze-string($version, $semver:regex)
     let $groups := $analysis/fn:match/fn:group
     return
-        if (exists($groups)) then
-            try {
-                (: an inline function for casting identifiers to the appropriate types :)
-                let $cast-identifier := function($identifier as xs:string) {
-                    if ($identifier castable as xs:integer) then
-                        $identifier cast as xs:integer
-                    else
-                        $identifier
-                }
-                let $release-identifiers := subsequence($groups, 1, 3) ! $cast-identifier(.)
-                (: groups 4 and 5 are optional and so must be selected by @nr rather than position :)
-                let $pre-release-identifiers := array { $groups[@nr eq "4"] ! tokenize(., "\.") ! $cast-identifier(.) }
-                let $build-metadata-identifiers := array { $groups[@nr eq "5"] ! tokenize(., "\.") ! $cast-identifier(.) }
-                return
-                    map {
-                        "major": $release-identifiers[1],
-                        "minor": $release-identifiers[2],
-                        "patch": $release-identifiers[3],
-                        "pre-release": $pre-release-identifiers,
-                        "build-metadata": $build-metadata-identifiers,
-                        "identifiers": array { $release-identifiers, $pre-release-identifiers, $build-metadata-identifiers }
-                    }
-            } catch * {
+        if (empty($groups)) then
+            if ($coerce) then 
+                semver:coerce($version)
+            else
                 semver:error("identifier-error", $version)
-            }
-        else if ($coerce) then 
-            semver:coerce($version)
         else
-            semver:error("regex-error", $version)
-};
-
+            let $release-identifiers := subsequence($groups, 1, 3) ! semver:cast-identifier(.)
+            (: Groups 4 and 5 are optional and so must be selected by @nr rather than position :)
+            let $pre-release-identifiers := array { $groups[@nr eq "4"] ! tokenize(., "\.") ! semver:cast-identifier(.) }
+            let $build-metadata-identifiers := array { $groups[@nr eq "5"] ! tokenize(., "\.") ! semver:cast-identifier(.) }
             return
-                let $mmpprbm :=
-                    if (not(empty($metadata?identifier)))
-                    then
-                        map:merge(($mmppr, map { "build-metadata": array { $metadata?identifier } }))
-                    else
-                        map:merge(($mmppr, map { "build-metadata": [] }))
-                return
-                    map:merge(($mmpprbm, map { "identifiers": [ $mmpprbm?major, $mmpprbm?minor, $mmpprbm?patch, $mmpprbm?pre-release, $mmpprbm?build-metadata ] }))
+                map {
+                    "major": $release-identifiers[1],
+                    "minor": $release-identifiers[2],
+                    "patch": $release-identifiers[3],
+                    "pre-release": $pre-release-identifiers,
+                    "build-metadata": $build-metadata-identifiers
+                }
+                => semver:populate-identifiers()
 };
 
 (:~ Coerce a non-SemVer version string into a SemVer string and parse it as such
