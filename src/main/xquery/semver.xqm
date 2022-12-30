@@ -283,6 +283,16 @@ declare function semver:lt($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
     semver:compare($v1, $v2, $coerce) eq -1
 };
 
+(:~ Test if a parsed v1 is a lower version than a parsed v2
+ :  
+ :  @param $v1 A parsed Semver version
+ :  @param $v2 A second parsed Semver version
+ :  @return true if v1 is less than v2
+ :)
+declare function semver:lt-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($v1, $v2) eq -1
+};
+
 (:~ Test if v1 is a lower version or the same version as v2 (strictly)
  :  
  :  @param $v1 A version string
@@ -304,6 +314,16 @@ declare function semver:le($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
     semver:compare($v1, $v2, $coerce) le 0
 };
 
+(:~ Test if a parsed v1 is a lower version or the same version as a parsed v2
+ :  
+ :  @param $v1 A parsed Semver version
+ :  @param $v2 A second parsed Semver version
+ :  @return true if v1 is less than or equal to v2
+ :)
+declare function semver:le-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($v1, $v2) le 0
+};
+
 (:~ Test if v1 is a higher version than v2 (strictly)
  :  @param $v1 A version string
  :  @param $v2 A second version string
@@ -321,6 +341,16 @@ declare function semver:gt($v1 as xs:string, $v2 as xs:string) as xs:boolean {
  :)
 declare function semver:gt($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
     semver:compare($v1, $v2, $coerce) eq 1
+};
+
+(:~ Test if a parsed v1 is a higher version than a parsed v2
+ :  
+ :  @param $v1 A parsed Semver version
+ :  @param $v2 A second parsed Semver version
+ :  @return true if v1 is greater than v2
+ :)
+declare function semver:gt-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($v1, $v2) eq 1
 };
 
 (:~ Test if v1 is the same or higher version than v2 (strictly)
@@ -343,6 +373,16 @@ declare function semver:ge($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
     semver:compare($v1, $v2, $coerce) ge 0
 };
 
+(:~ Test if a parsed v1 is the same or higher version than a parsed v2
+ :  
+ :  @param $v1 A parsed Semver version
+ :  @param $v2 A second parsed Semver version
+ :  @return true if v1 is greater than or equal to v2
+ :)
+declare function semver:ge-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($v1, $v2) ge 0
+};
+
 (:~ Test if v1 is equal to v2 (strictly)
  :  
  :  @param $v1 A version string
@@ -361,6 +401,16 @@ declare function semver:eq($v1 as xs:string, $v2 as xs:string) as xs:boolean {
  :)
 declare function semver:eq($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
     semver:compare($v1, $v2) eq 0
+};
+
+(:~ Test if a parsed v1 is equal to a parsed v2
+ :  
+ :  @param $v1 A parsed Semver version
+ :  @param $v2 A second parsed Semver version
+ :  @return true if v1 is equal to v2
+ :)
+declare function semver:eq-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($v1, $v2) eq 0
 };
 
 (:~ Test if v1 is not equal to v2 (strictly)
@@ -382,6 +432,16 @@ declare function semver:ne($v1 as xs:string, $v2 as xs:string) as xs:boolean {
  :)
 declare function semver:ne($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
     semver:compare($v1, $v2, $coerce) ne 0
+};
+
+(:~ Test if a parsed v1 is not equal to a parsed v2
+ :  
+ :  @param $v1 A parsed Semver version
+ :  @param $v2 A second parsed Semver version
+ :  @return true if v1 is not equal to v2
+ :)
+declare function semver:ne-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($v1, $v2) ne 0
 };
 
 (:~ Compare release identifiers
