@@ -198,9 +198,25 @@ declare function semver:serialize(
  :  
  :  @param $parsed-version A map containing the components of the SemVer string
  :  @return A SemVer string
+ :  @deprecated As of 2.4.0 replace with serialize-parsed
  :)
-declare function semver:serialize($version as map(*)) {
-    semver:serialize($version?major, $version?minor, $version?patch, $version?pre-release, $version?build-metadata)
+declare function semver:serialize($parsed-version as map(*)) {
+    semver:serialize-parsed($parsed-version)
+};
+
+(:~ Serialize a parsed SemVer version
+ :  
+ :  @param $parsed-version A map containing the components of the SemVer string
+ :  @return A SemVer string
+ :)
+declare function semver:serialize-parsed($parsed-version as map(*)) {
+    semver:serialize(
+        $parsed-version?major, 
+        $parsed-version?minor, 
+        $parsed-version?patch, 
+        $parsed-version?pre-release, 
+        $parsed-version?build-metadata
+    )
 };
 
 (:~ Compare two versions (strictly)
