@@ -646,15 +646,15 @@ declare function semver:sort($versions as xs:string+, $coerce as xs:boolean) as 
  :)
 declare function semver:sort($items as item()*, $function as function(*), $coerce as xs:boolean) as item()* {
     let $items-with-version :=
-            for $item in $items
-            let $version-string := $function($item)
-            let $parsed-version := semver:parse($version-string, $coerce)
-            return
-                map {
-                    "item": $item,
-                    "version-string": $version-string,
-                    "parsed-version": $parsed-version
-                }
+        for $item in $items
+        let $version-string := $function($item)
+        let $parsed-version := semver:parse($version-string, $coerce)
+        return
+            map {
+                "item": $item,
+                "version-string": $version-string,
+                "parsed-version": $parsed-version
+            }
     let $sorted-versions := semver:sort-parsed($items-with-version?parsed-version)
     for $sorted-version in $sorted-versions
     for $item-with-version in $items-with-version
