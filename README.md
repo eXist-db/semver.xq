@@ -17,3 +17,21 @@ $ mvn package
 ```
 
 There will be a `.xar` file in the `target/` sub-folder.
+
+
+## Development / Manual Testing
+
+Simply run: `mvn -Pdev docker:start` to start a Docker environment of eXist-db on port 9090
+with the semver.xq package already deployed.
+
+As the Docker environment binds the files from the host filesystem, changes to the source code
+are reflected immediately in the running eXist-db environment.
+
+You can override the Docker host port for eXist-db from port 9090 to a port of your choosing by
+specifying `-Ddev.port=9191`, e.g.: `mvn -Pdev -Ddev.port=9191 docker:start`.
+
+If you also want the Dashboard and eXide to be available from the Docker environment of eXist-db
+you can invoke the target `public-xar-repo:resolve` before you call `docker:start`,
+e.g. `mvn -Pdev public-xar-repo:resolve docker:start`.
+
+To stop the Docker environment run: `mvn -Pdev docker:stop`.
