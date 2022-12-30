@@ -62,6 +62,23 @@ declare variable $semver:regex :=
     || "$"
 ;
 
+(:~ A forgiving regular expression for capturing groups needed to coerce a non-SemVer string into a SemVer string :)
+declare variable $semver:coerce-regex := 
+    (: Start of string:)
+    "^"
+    (: Major version: One or more characters that are not `-`, `+`, or `.` :)
+    || "([^-+.]+?)"
+    (: `.` + Minor version: One or more characters that are not `-`, `+`, or `.` :)
+    || "(?:\.([^-+.]+?))?"
+    (: `.` + Patch version: One or more characters that are not `-`, `+`, or `.` :)
+    || "(?:\.([^-+.]+?))?"
+    (: `-` + Pre-release metadata (optional): One or more characters that are not `+` :)
+    || "(?:-([^+]+?))?"
+    (: `+` + Build metadata (optional): One or more characters :)
+    || "(?:\+(.+))?"
+    (: End of string :)
+    || "$";
+
 (:~ Validate whether a SemVer string conforms to the spec
  :  @param A version string
  :  @return True if the version is valid, false if not
