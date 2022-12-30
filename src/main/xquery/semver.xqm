@@ -353,6 +353,16 @@ declare function semver:eq($v1 as xs:string, $v2 as xs:string) as xs:boolean {
     semver:compare($v1, $v2) eq 0
 };
 
+(:~ Test if v1 is equal to v2 (with an option to coerce invalid SemVer strings)
+ :  
+ :  @param $v1 A version string
+ :  @param $v2 A second version string
+ :  @return true if v1 is equal to v2
+ :)
+declare function semver:eq($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
+    semver:compare($v1, $v2) eq 0
+};
+
 (:~ Test if v1 is not equal to v2 (strictly)
  :  
  :  @param $v1 A version string
