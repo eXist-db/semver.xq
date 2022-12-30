@@ -174,7 +174,13 @@ declare function semver:coerce($version as xs:string) {
  :  @param $build-metadata Build identifiers
  :  @return A SemVer string
  :)
-declare function semver:serialize($major as xs:integer, $minor as xs:integer, $patch as xs:integer, $pre-release as xs:anyAtomicType*, $build-metadata as xs:anyAtomicType*) {
+declare function semver:serialize(
+    $major as xs:integer, 
+    $minor as xs:integer, 
+    $patch as xs:integer, 
+    $pre-release as xs:anyAtomicType*, 
+    $build-metadata as xs:anyAtomicType*
+) {
     let $release := string-join(($major, $minor, $patch), ".")
     let $pre-release := string-join($pre-release ! string(.), ".")
     let $build-metadata := string-join($build-metadata ! string(.), ".")
