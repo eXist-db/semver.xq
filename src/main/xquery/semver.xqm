@@ -629,7 +629,7 @@ declare function semver:sort($versions as xs:string+) as xs:string+ {
  :  @param $coerce An option for coercing non-SemVer version strings into parsable form
  :  @return A sequence of sorted version strings
  :)
-declare function semver:sort($versions as xs:string+, $coerce as xs:boolean) as xs:string+ {
+declare function semver:sort($versions as xs:string*, $coerce as xs:boolean) as xs:string* {
     let $parsed := $versions ! semver:parse(., $coerce)
     let $sorted := semver:sort-parsed($parsed)
     for $s in $sorted
@@ -666,7 +666,7 @@ declare function semver:sort($items as item()*, $function as function(*), $coerc
  :  @param $parsed-versions A sequence of SemVer maps, containing entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array
  :  @return A sorted sequence of SemVer maps, containing entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array
  :)
-declare %private function semver:sort-parsed($parsed-versions as map(*)+) as map(*)+ {
+declare function semver:sort-parsed($parsed-versions as map(*)*) as map(*)* {
     (: First, sort versions by major, minor, and patch (using fast standard sort) :)
     let $release-sorted := fn:sort($parsed-versions, (), function($p) { $p?major, $p?minor, $p?patch } )
     return
