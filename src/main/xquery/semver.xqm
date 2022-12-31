@@ -326,8 +326,8 @@ declare function semver:serialize-parsed($parsed-version as map(*)) {
 
 (:~ Compare two versions (strictly)
  :  
- :  @param $v1 A version string
- :  @param $v2 A second version string
+ :  @param $parsed-v1 A version string
+ :  @param $parsed-v2 A second version string
  :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
  :)
 declare function semver:compare($v1 as xs:string, $v2 as xs:string) as xs:integer {
@@ -353,31 +353,31 @@ declare function semver:compare($v1 as xs:string, $v2 as xs:string, $coerce as x
 
 (:~ Compare two parsed SemVer versions
  :  
- :  @param $v1 A map containing analysis of a version string
- :  @param $v2 A map containing analysis of a second version string
+ :  @param $parsed-v1 A map containing analysis of a version string
+ :  @param $parsed-v2 A map containing analysis of a second version string
  :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
  :)
-declare function semver:compare-parsed($v1 as map(*), $v2 as map(*)) as xs:integer {
+declare function semver:compare-parsed($parsed-v1 as map(*), $parsed-v2 as map(*)) as xs:integer {
     (: Compare major, minor, and patch identifiers :)
     let $release-comparison :=
         semver:compare-release(
-            array:subarray($v1?identifiers, 1, 3),
-            array:subarray($v2?identifiers, 1, 3)
+            array:subarray($parsed-v1?identifiers, 1, 3),
+            array:subarray($parsed-v2?identifiers, 1, 3)
         )
     return
         switch ($release-comparison)
             case 0 return
                 (: When major, minor, and patch are equal, a pre-release version has lower precedence than a normal version. :)
-                if (array:size($v1?pre-release) eq 0 and array:size($v2?pre-release) gt 0) then
+                if (array:size($parsed-v1?pre-release) eq 0 and array:size($parsed-v2?pre-release) gt 0) then
                     1
-                else if (array:size($v1?pre-release) gt 0 and array:size($v2?pre-release) eq 0) then
+                else if (array:size($parsed-v1?pre-release) gt 0 and array:size($parsed-v2?pre-release) eq 0) then
                     -1
                 else
                     (: When major, minor, and patch are equal, compare pre-release :)
                     (: Build metadata SHOULD be ignored when determining version precedence. :)
                     semver:compare-pre-release(
-                        $v1?pre-release,
-                        $v2?pre-release
+                        $parsed-v1?pre-release,
+                        $parsed-v2?pre-release
                     )
             default return
                 $release-comparison
@@ -406,12 +406,12 @@ declare function semver:lt($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
 
 (:~ Test if a parsed v1 is a lower version than a parsed v2
  :  
- :  @param $v1 A parsed Semver version
- :  @param $v2 A second parsed Semver version
+ :  @param $parsed-v1 A parsed Semver version
+ :  @param $parsed-v2 A second parsed Semver version
  :  @return true if v1 is less than v2
  :)
-declare function semver:lt-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
-    semver:compare-parsed($v1, $v2) eq -1
+declare function semver:lt-parsed($parsed-v1 as map(*), $parsed-v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($parsed-v1, $parsed-v2) eq -1
 };
 
 (:~ Test if v1 is a lower version or the same version as v2 (strictly)
@@ -437,12 +437,12 @@ declare function semver:le($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
 
 (:~ Test if a parsed v1 is a lower version or the same version as a parsed v2
  :  
- :  @param $v1 A parsed Semver version
- :  @param $v2 A second parsed Semver version
+ :  @param $parsed-v1 A parsed Semver version
+ :  @param $parsed-v2 A second parsed Semver version
  :  @return true if v1 is less than or equal to v2
  :)
-declare function semver:le-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
-    semver:compare-parsed($v1, $v2) le 0
+declare function semver:le-parsed($parsed-v1 as map(*), $parsed-v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($parsed-v1, $parsed-v2) le 0
 };
 
 (:~ Test if v1 is a higher version than v2 (strictly)
@@ -466,12 +466,12 @@ declare function semver:gt($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
 
 (:~ Test if a parsed v1 is a higher version than a parsed v2
  :  
- :  @param $v1 A parsed Semver version
- :  @param $v2 A second parsed Semver version
+ :  @param $parsed-v1 A parsed Semver version
+ :  @param $parsed-v2 A second parsed Semver version
  :  @return true if v1 is greater than v2
  :)
-declare function semver:gt-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
-    semver:compare-parsed($v1, $v2) eq 1
+declare function semver:gt-parsed($parsed-v1 as map(*), $parsed-v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($parsed-v1, $parsed-v2) eq 1
 };
 
 (:~ Test if v1 is the same or higher version than v2 (strictly)
@@ -496,12 +496,12 @@ declare function semver:ge($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
 
 (:~ Test if a parsed v1 is the same or higher version than a parsed v2
  :  
- :  @param $v1 A parsed Semver version
- :  @param $v2 A second parsed Semver version
+ :  @param $parsed-v1 A parsed Semver version
+ :  @param $parsed-v2 A second parsed Semver version
  :  @return true if v1 is greater than or equal to v2
  :)
-declare function semver:ge-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
-    semver:compare-parsed($v1, $v2) ge 0
+declare function semver:ge-parsed($parsed-v1 as map(*), $parsed-v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($parsed-v1, $parsed-v2) ge 0
 };
 
 (:~ Test if v1 is equal to v2 (strictly)
@@ -526,12 +526,12 @@ declare function semver:eq($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
 
 (:~ Test if a parsed v1 is equal to a parsed v2
  :  
- :  @param $v1 A parsed Semver version
- :  @param $v2 A second parsed Semver version
+ :  @param $parsed-v1 A parsed Semver version
+ :  @param $parsed-v2 A second parsed Semver version
  :  @return true if v1 is equal to v2
  :)
-declare function semver:eq-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
-    semver:compare-parsed($v1, $v2) eq 0
+declare function semver:eq-parsed($parsed-v1 as map(*), $parsed-v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($parsed-v1, $parsed-v2) eq 0
 };
 
 (:~ Test if v1 is not equal to v2 (strictly)
@@ -557,12 +557,12 @@ declare function semver:ne($v1 as xs:string, $v2 as xs:string, $coerce as xs:boo
 
 (:~ Test if a parsed v1 is not equal to a parsed v2
  :  
- :  @param $v1 A parsed Semver version
- :  @param $v2 A second parsed Semver version
+ :  @param $parsed-v1 A parsed Semver version
+ :  @param $parsed-v2 A second parsed Semver version
  :  @return true if v1 is not equal to v2
  :)
-declare function semver:ne-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
-    semver:compare-parsed($v1, $v2) ne 0
+declare function semver:ne-parsed($parsed-v1 as map(*), $parsed-v2 as map(*)) as xs:boolean {
+    semver:compare-parsed($parsed-v1, $parsed-v2) ne 0
 };
 
 (:~ Compare release identifiers
@@ -571,17 +571,17 @@ declare function semver:ne-parsed($v1 as map(*), $v2 as map(*)) as xs:boolean {
  :  @param $v2 A second array of release identifiers
  :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
  :)
-declare %private function semver:compare-release($v1 as array(*), $v2 as array(*)) {
+declare %private function semver:compare-release($v1-release-ids as array(*), $v2-release-ids as array(*)) {
     (: No (more) pairs to compare, so the release portions of the two versions are of equal precedence :)
-    if (array:size($v1) eq 0 and array:size($v2) eq 0) then
+    if (array:size($v1-release-ids) eq 0 and array:size($v2-release-ids) eq 0) then
         0
     (: Compare members using numeric operators :)
-    else if (array:head($v1) lt array:head($v2)) then
+    else if (array:head($v1-release-ids) lt array:head($v2-release-ids)) then
         -1
-    else if (array:head($v1) gt array:head($v2)) then
+    else if (array:head($v1-release-ids) gt array:head($v2-release-ids)) then
         1
     else
-        semver:compare-release(array:tail($v1), array:tail($v2))
+        semver:compare-release(array:tail($v1-release-ids), array:tail($v2-release-ids))
 };
 
 (:~ Compare pre-release identifiers
@@ -590,30 +590,29 @@ declare %private function semver:compare-release($v1 as array(*), $v2 as array(*
  :  @param $v2 A second array of pre-release identifiers
  :  @return -1 if v1 < v2, 0 if v1 = v2, or 1 if v1 > v2.
  :)
-declare %private function semver:compare-pre-release($v1 as array(*), $v2 as array(*)) {
+declare %private function semver:compare-pre-release($v1-pre-release-ids as array(*), $v2-pre-release-ids as array(*)) {
     (: No (more) pairs to compare, so the two versions are of equal precedence :)
-    if (array:size($v1) eq 0 and array:size($v2) eq 0) then
+    if (array:size($v1-pre-release-ids) eq 0 and array:size($v2-pre-release-ids) eq 0) then
         0
     (: A larger set of pre-release fields has a higher precedence than a smaller set, if all of the preceding identifiers are equal. :)
-    else if (array:size($v1) eq 0) then
+    else if (array:size($v1-pre-release-ids) eq 0) then
         -1
-    else if (array:size($v2) eq 0) then
+    else if (array:size($v2-pre-release-ids) eq 0) then
         1
     (: Numeric identifiers always have lower precedence than non-numeric identifiers. :)
-    else if (array:head($v1) instance of xs:string and array:head($v2) instance of xs:integer) then
+    else if (array:head($v1-pre-release-ids) instance of xs:string and array:head($v2-pre-release-ids) instance of xs:integer) then
         1
-    else if (array:head($v1) instance of xs:integer and array:head($v2) instance of xs:string) then
+    else if (array:head($v1-pre-release-ids) instance of xs:integer and array:head($v2-pre-release-ids) instance of xs:string) then
         -1
     (: Compare values using comparison operators :)
-    else if (array:head($v1) lt array:head($v2)) then
+    else if (array:head($v1-pre-release-ids) lt array:head($v2-pre-release-ids)) then
         -1
-    else if (array:head($v1) gt array:head($v2)) then
+    else if (array:head($v1-pre-release-ids) gt array:head($v2-pre-release-ids)) then
         1
     (: These identifiers are equal, so recurse to the next pair of identifiers :)
     else
-        semver:compare-pre-release(array:tail($v1), array:tail($v2))
+        semver:compare-pre-release(array:tail($v1-pre-release-ids), array:tail($v2-pre-release-ids))
 };
-
 
 (:~ Sort SemVer strings (strictly)
  :  
