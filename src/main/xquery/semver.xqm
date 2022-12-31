@@ -657,7 +657,7 @@ declare function semver:sort($items as item()*, $function as function(*), $coerc
     let $sorted-versions := semver:sort-parsed($items-with-version?parsed-version)
     for $sorted-version in $sorted-versions
     for $item-with-version in $items-with-version
-    where semver:compare-parsed($item-with-version?parsed-version, $sorted-version) eq 0
+    where semver:eq-parsed($item-with-version?parsed-version, $sorted-version)
     return
         $item-with-version?item
 };
