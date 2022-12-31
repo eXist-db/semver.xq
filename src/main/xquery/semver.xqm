@@ -170,7 +170,7 @@ declare function semver:parse($version as xs:string, $coerce as xs:boolean) as m
  :  @param $version A version string which will be coerced into a parsed SemVer version
  :  @return A map containing analysis of the coerced version, with entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array. Fallback for invalid version strings: 0.0.0.
  :)
-declare function semver:coerce($version as xs:string) {
+declare function semver:coerce($version as xs:string) as map(*) {
     let $analysis := analyze-string($version, $semver:coerce-regex)
     let $groups := $analysis/fn:match/fn:group
     let $release-identifiers := $groups[@nr = ("1", "2", "3")] ! replace(., "\D+", "") ! semver:cast-identifier(.)
@@ -748,7 +748,7 @@ declare %private function semver:error($code as xs:string, $version as xs:string
  :  @param $identifier An identifier
  :  return The identifier unchanged or cast as an integer
  :)
-declare %private function semver:cast-identifier($identifier as xs:string) {
+declare %private function semver:cast-identifier($identifier as xs:string) as xs:anyAtomicType {
     if ($identifier castable as xs:integer) then
         $identifier cast as xs:integer
     else
@@ -760,7 +760,7 @@ declare %private function semver:cast-identifier($identifier as xs:string) {
  :  @param $parsed-version A map containing analysis of a version string
  :  return The map with an identifiers entry
  :)
-declare %private function semver:populate-identifiers($parsed-version as map(*)) {
+declare %private function semver:populate-identifiers($parsed-version as map(*)) as map(*) {
     $parsed-version
     => map:put("identifiers", [ $parsed-version?major, $parsed-version?minor, $parsed-version?patch, $parsed-version?pre-release, $parsed-version?build-metadata ])
 };
