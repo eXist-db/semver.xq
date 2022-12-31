@@ -50,7 +50,7 @@ declare namespace map="http://www.w3.org/2005/xpath-functions/map";
  :  @see https://semver.org/spec/v2.0.0.html#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
  :)
 declare variable $semver:regex :=
-    (: Start of string:)
+    (: Start of string :)
     "^"
     (: Major version: A zero for initial development or a non-negative integer without leading zeros :)
     || "(0|[1-9]\d*)"
@@ -66,9 +66,9 @@ declare variable $semver:regex :=
     || "$"
 ;
 
-(:~ A forgiving regular expression for capturing groups needed to coerce a non-SemVer string into a SemVer string :)
+(:~ A forgiving regular expression for capturing groups needed to coerce a non-SemVer string into SemVer components :)
 declare variable $semver:coerce-regex := 
-    (: Start of string:)
+    (: Start of string :)
     "^"
     (: Major version: One or more characters that are not `-`, `+`, or `.` :)
     || "([^-+.]+?)"
@@ -88,7 +88,7 @@ declare variable $semver:coerce-regex :=
  :  @see http://expath.org/spec/pkg#pkgdep
  :)
 declare variable $semver:expath-package-semver-template-regex :=
-    (: Start of string:)
+    (: Start of string :)
     "^"
     (: Major version: A zero for initial development or a non-negative integer without leading zeros :)
     || "(0|[1-9]\d*)"
@@ -688,7 +688,7 @@ declare %private function semver:sort-parsed($parsed-versions as map(*)+) as map
                 return
                     (
                         semver:sort-pre-release($pre-releases, ()),
-                        (: versions without pre-release metadata take precedence :)
+                        (: Versions without pre-release metadata take precedence :)
                         $releases
                     )
 };
