@@ -31,9 +31,13 @@ xquery version "3.1";
  :
  :  SemVer rules are applied strictly, raising errors when version strings do
  :  not conform to the spec.
+ : 
+ :  Additional functions are supplied for handling SemVer templates, as defined 
+ :  in the EXPath Package spec.
  :
  :  @author Joe Wicentowski
  :  @see https://semver.org/spec/v2.0.0.html
+ :  @see http://expath.org/spec/pkg#pkgdep
  :)
 
 module namespace semver = "http://exist-db.org/xquery/semver";
@@ -79,6 +83,26 @@ declare variable $semver:coerce-regex :=
     (: End of string :)
     || "$";
 
+(:~ A regular expression for validating SemVer templates as defined in the EXPath Package spec
+ :  
+ :  @see http://expath.org/spec/pkg#pkgdep
+ :)
+declare variable $semver:expath-package-semver-template-regex :=
+    (: Start of string:)
+    "^"
+    (: Major version: A zero for initial development or a non-negative integer without leading zeros :)
+    || "(0|[1-9]\d*)"
+    (: `.` + Minor version: Empty for a major version template, or a zero or a non-negative integer without leading zeros for a minor version template :)
+    || "(?:\.(0|[1-9]\d*))?"
+    (: `.` + Patch version: Empty:)
+    || "()"
+    (: `-` + Pre-release metadata: One or more characters that are not `+` :)
+    || "(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)"
+    (: `+` + Build metadata: One or more characters :)
+    || "(?:\+(.+))?(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
+    (: End of string :)
+    || "$";
+
 (:~ Validate whether a SemVer string conforms to the spec
  :  
  :  @param $version A version string
@@ -86,6 +110,15 @@ declare variable $semver:coerce-regex :=
  :)
 declare function semver:validate($version as xs:string) as xs:boolean {
     matches($version, $semver:regex)
+};
+
+(:~ Validate whether a version string conforms to the rules for SemVer templates as defined in the EXPath Package spec
+ :  
+ :  @param $version A version string
+ :  @return True if the version is an SemVer template, false if not
+ :)
+declare function semver:validate-expath-package-semver-template($version as xs:string) as xs:boolean {
+    matches($version, $semver:expath-package-semver-template-regex)
 };
 
 (:~ Parse a SemVer string (strictly)
@@ -155,14 +188,87 @@ declare function semver:coerce($version as xs:string) {
         => semver:populate-identifiers()
 };
 
+(:~ Resolve an EXPath Package SemVer Template as minimum (floor)
+ :  
+ :  @param $version An EXPath SemVer Template
+ :  @return A map containing the resolved version, with entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
  :)
+declare function semver:resolve-expath-package-semver-template-min($version as xs:string) as map(*) {
+    semver:resolve-expath-package-semver-template($version, "min")
 };
 
+(:~ Resolve an EXPath Package SemVer Template as maximum (ceiling)
+ :  
+ :  @param $version An EXPath SemVer Template
+ :  @return A map containing the resolved version, with entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
  :)
+declare function semver:resolve-expath-package-semver-template-max($version as xs:string) as map(*)  {
+    semver:resolve-expath-package-semver-template($version, "max")
 };
 
+(:~ Resolve an EXPath SemVer Package Template
+ :  
+ :  @param $version An EXPath Package SemVer Template
+ :  @param $mode Mode for resolving the template: "min" (floor) or "max" (ceiling)
+ :  @return A map containing the resolved version, with entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
+ :)
+declare function semver:resolve-expath-package-semver-template($version as xs:string, $mode as xs:string) {
+    let $analysis := analyze-string($version, $semver:expath-package-semver-template-regex)
+    let $groups := $analysis/fn:match/fn:group
     return
+        if (empty($groups)) then 
+            semver:error("template-error", $version)
         else
+            let $release-identifiers := $groups[@nr = ("1", "2", "3")] ! replace(., "\D+", "")[. ne ""] ! semver:cast-identifier(.)
+            let $major := if ($release-identifiers[1] instance of xs:integer) then $release-identifiers[1] else 0
+            let $minor := if ($release-identifiers[2] instance of xs:integer) then $release-identifiers[2] else 0
+            let $patch := if ($release-identifiers[3] instance of xs:integer) then $release-identifiers[3] else 0
+            let $pre-release-identifiers := array { $groups[@nr eq "4"] ! tokenize(., "\.") ! semver:cast-identifier(.) }
+            let $build-metadata-identifiers := array { $groups[@nr eq "5"] ! tokenize(., "\.") ! semver:cast-identifier(.) }
+            let $is-major-version-template := empty($release-identifiers[2])
+            return
+                if ($is-major-version-template) then
+                    map {
+                        "major": if ($mode eq "min") then $major else $major + 1,
+                        "minor": 0,
+                        "patch": 0,
+                        "pre-release": [],
+                        "build-metadata": []
+                    }
+                    => semver:populate-identifiers()
+                else (: if ($is-minor-version-template) then :)
+                    map {
+                        "major": $major,
+                        "minor": if ($mode eq "min") then $minor else $minor + 1,
+                        "patch": 0,
+                        "pre-release": [],
+                        "build-metadata": []
+                    }
+                    => semver:populate-identifiers()
+};
+
+(:~ Resolve a valid EXPath Package SemVer Template string if it is a valid, or parse a SemVer string (strictly)
+ :  
+ :  @param $version An EXPath Package SemVer Template
+ :  @param $mode Mode for resolving the template: "min" (floor) or "max" (ceiling)
+ :  @return A map containing the resolved/parsed version, with entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
+ :)
+declare function semver:resolve-if-expath-package-server-template-else-parse($version as xs:string, $mode as xs:string) {
+    semver:resolve-if-expath-package-server-template-else-parse($version, $mode, false())
+};
+
+(:~ Resolve a valid EXPath Package SemVer Template string if it is a valid, or parse a SemVer string (with an option to coerce invalid SemVer strings)
+ :  
+ :  @param $version An EXPath Package SemVer Template
+ :  @param $mode Mode for resolving the template: "min" (floor) or "max" (ceiling)
+ :  @param $coerce An option for coercing non-SemVer version strings into parsable form
+ :  @return A map containing the resolved/parsed version, with entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
+ :)
+declare function semver:resolve-if-expath-package-server-template-else-parse($version as xs:string, $mode as xs:string, $coerce as xs:boolean) {
+    if (semver:validate-expath-package-semver-template($version)) then 
+        semver:resolve-expath-package-semver-template($version, $mode)
+    else
+        semver:parse($version, $coerce)
 };
 
 (:~ Serialize a SemVer string
@@ -627,6 +733,11 @@ declare %private function semver:error($code as xs:string, $version as xs:string
                 map {
                     "description": "Version identifiers did not conform to SemVer spec",
                     "qname": QName("http://joewiz.org/ns/xquery/semver", "identifier-error")
+                },
+            "template-error":
+                map {
+                    "description": "Template did not conform to the EXPath Package spec for SemVer templates",
+                    "qname": QName("http://joewiz.org/ns/xquery/semver", "template-error")
                 }
         }
     let $error := $errors?($code)
