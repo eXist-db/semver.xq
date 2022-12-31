@@ -34,7 +34,7 @@ declare namespace test = "http://exist-db.org/xquery/xqsuite";
 
 
 declare
-	%test:assertEquals("5.0.0-RC.5+201908061711")
+    %test:assertEquals("5.0.0-RC.5+201908061711")
 function stse:serialize() {
     semver:serialize(
         5,

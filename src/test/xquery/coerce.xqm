@@ -36,121 +36,121 @@ declare namespace test = "http://exist-db.org/xquery/xqsuite";
 declare
     %test:assertEquals
     (
-	    '<semver major="0" minor="0" patch="0"/>',
-	    '<semver major="1" minor="0" patch="0"/>',
-	    '<semver major="4" minor="0" patch="0"/>',
-	    '<semver major="99999" minor="0" patch="0"/>'
+        '<semver major="0" minor="0" patch="0"/>',
+        '<semver major="1" minor="0" patch="0"/>',
+        '<semver major="4" minor="0" patch="0"/>',
+        '<semver major="99999" minor="0" patch="0"/>'
     )
 function stco:major() {
-	(
-	    "0",
-	    "1",
-	    "4",
-	    "99999"
-	) ! stco:semver-to-xml(semver:coerce(.))
+    (
+        "0",
+        "1",
+        "4",
+        "99999"
+    ) ! stco:semver-to-xml(semver:coerce(.))
 };
 
 declare
     %test:assertEquals
     (
-	    '<semver major="0" minor="1" patch="0"/>',
-	    '<semver major="0" minor="4" patch="0"/>',
-	    '<semver major="1" minor="0" patch="0"/>',
-	    '<semver major="1" minor="1" patch="0"/>',
-	    '<semver major="1" minor="4" patch="0"/>'
+        '<semver major="0" minor="1" patch="0"/>',
+        '<semver major="0" minor="4" patch="0"/>',
+        '<semver major="1" minor="0" patch="0"/>',
+        '<semver major="1" minor="1" patch="0"/>',
+        '<semver major="1" minor="4" patch="0"/>'
     )
 function stco:major-minor() {
-	(
-	    "0.1",
-	    "0.4",
-	    "1.0",
-	    "1.1",
-	    "1.4"
-	) ! stco:semver-to-xml(semver:coerce(.))
+    (
+        "0.1",
+        "0.4",
+        "1.0",
+        "1.1",
+        "1.4"
+    ) ! stco:semver-to-xml(semver:coerce(.))
 };
 
 declare
     %test:assertEquals
     (
-	    '<semver major="0" minor="0" patch="0"><pre-release>RC1</pre-release></semver>',
-	    '<semver major="1" minor="0" patch="0"><pre-release>SNAPSHOT</pre-release></semver>',
-	    '<semver major="4" minor="0" patch="0"><pre-release>alpha-beta</pre-release></semver>'
+        '<semver major="0" minor="0" patch="0"><pre-release>RC1</pre-release></semver>',
+        '<semver major="1" minor="0" patch="0"><pre-release>SNAPSHOT</pre-release></semver>',
+        '<semver major="4" minor="0" patch="0"><pre-release>alpha-beta</pre-release></semver>'
     )
 function stco:major-pre-release() {
-	(
-	    "0-RC1",
-	    "1-SNAPSHOT",
-	    "4-alpha-beta"
-	) ! stco:semver-to-xml(semver:coerce(.))
+    (
+        "0-RC1",
+        "1-SNAPSHOT",
+        "4-alpha-beta"
+    ) ! stco:semver-to-xml(semver:coerce(.))
 };
 
 declare
     %test:assertEquals
     (
-	    '<semver major="0" minor="1" patch="0"><pre-release>SNAPSHOT</pre-release></semver>',
-	    '<semver major="0" minor="4" patch="0"><pre-release>RC9</pre-release></semver>',
-	    '<semver major="1" minor="0" patch="0"><pre-release>alpha</pre-release></semver>',
-	    '<semver major="1" minor="0" patch="0"><pre-release>alpha</pre-release><pre-release>beta</pre-release></semver>'
+        '<semver major="0" minor="1" patch="0"><pre-release>SNAPSHOT</pre-release></semver>',
+        '<semver major="0" minor="4" patch="0"><pre-release>RC9</pre-release></semver>',
+        '<semver major="1" minor="0" patch="0"><pre-release>alpha</pre-release></semver>',
+        '<semver major="1" minor="0" patch="0"><pre-release>alpha</pre-release><pre-release>beta</pre-release></semver>'
     )
 function stco:major-minor-pre-release() {
-	(
-	    "0.1-SNAPSHOT",
-	    "0.4-RC9",
-	    "1.0-alpha",
-	    "1.0-alpha.beta"
-	) ! stco:semver-to-xml(semver:coerce(.))
+    (
+        "0.1-SNAPSHOT",
+        "0.4-RC9",
+        "1.0-alpha",
+        "1.0-alpha.beta"
+    ) ! stco:semver-to-xml(semver:coerce(.))
 };
 
 declare
     %test:assertEquals
     (
-	    '<semver major="0" minor="0" patch="0"><build-metadata>2019</build-metadata></semver>',
-	    '<semver major="1" minor="0" patch="0"><build-metadata>2019-08-09</build-metadata><build-metadata>2350</build-metadata></semver>'
+        '<semver major="0" minor="0" patch="0"><build-metadata>2019</build-metadata></semver>',
+        '<semver major="1" minor="0" patch="0"><build-metadata>2019-08-09</build-metadata><build-metadata>2350</build-metadata></semver>'
     )
 function stco:major-build-metadata() {
-	(
-	    "0+2019",
-	    "1+2019-08-09.2350"
-	) ! stco:semver-to-xml(semver:coerce(.))
+    (
+        "0+2019",
+        "1+2019-08-09.2350"
+    ) ! stco:semver-to-xml(semver:coerce(.))
 };
 
 declare
     %test:assertEquals
     (
-	    '<semver major="0" minor="1" patch="1"/>',
-	    '<semver major="10" minor="4" patch="12"/>'
+        '<semver major="0" minor="1" patch="1"/>',
+        '<semver major="10" minor="4" patch="12"/>'
     )
 function stco:major-minor-patch() {
-	(
-	    "0.1.1",
-	    "10.4.012"
-	) ! stco:semver-to-xml(semver:coerce(.))
+    (
+        "0.1.1",
+        "10.4.012"
+    ) ! stco:semver-to-xml(semver:coerce(.))
 };
 
 declare
     %test:assertEquals
     (
-	    '<semver major="0" minor="1" patch="1"><pre-release>SNAPSHOT</pre-release></semver>',
-	    '<semver major="10" minor="4" patch="12"><pre-release>alpha-beta</pre-release></semver>',
-	    '<semver major="10" minor="4" patch="12"><pre-release>alpha</pre-release><pre-release>gamma</pre-release></semver>'
+        '<semver major="0" minor="1" patch="1"><pre-release>SNAPSHOT</pre-release></semver>',
+        '<semver major="10" minor="4" patch="12"><pre-release>alpha-beta</pre-release></semver>',
+        '<semver major="10" minor="4" patch="12"><pre-release>alpha</pre-release><pre-release>gamma</pre-release></semver>'
     )
 function stco:major-minor-patch-pre-release() {
-	(
-	    "0.1.1-SNAPSHOT",
-	    "10.4.012-alpha-beta",
-	    "10.4.012-alpha.gamma"
-	) ! stco:semver-to-xml(semver:coerce(.))
+    (
+        "0.1.1-SNAPSHOT",
+        "10.4.012-alpha-beta",
+        "10.4.012-alpha.gamma"
+    ) ! stco:semver-to-xml(semver:coerce(.))
 };
 
 declare
     %test:assertEquals
     (
-	    '<semver major="1" minor="2" patch="3"><pre-release>stuff</pre-release><pre-release>AND</pre-release><build-metadata>things-yeah</build-metadata><build-metadata>YES</build-metadata></semver>'
+        '<semver major="1" minor="2" patch="3"><pre-release>stuff</pre-release><pre-release>AND</pre-release><build-metadata>things-yeah</build-metadata><build-metadata>YES</build-metadata></semver>'
     )
 function stco:major-minor-patch-pre-release-build-metadata() {
-	(
-	    "1.2.3-stuff.AND+things-yeah.YES"
-	) ! stco:semver-to-xml(semver:coerce(.))
+    (
+        "1.2.3-stuff.AND+things-yeah.YES"
+    ) ! stco:semver-to-xml(semver:coerce(.))
 };
 
 
