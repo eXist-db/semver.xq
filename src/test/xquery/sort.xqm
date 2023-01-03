@@ -34,15 +34,15 @@ declare namespace test = "http://exist-db.org/xquery/xqsuite";
 
 
 declare
-	%test:assertEquals(
-	    "1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta",
-	    "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11",
-	    "1.0.0-rc.1", "1.0.0", "2.0.0", "2.1.0", "2.1.1")
+    %test:assertEquals(
+        "1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta",
+        "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11",
+        "1.0.0-rc.1", "1.0.0", "2.0.0", "2.1.0", "2.1.1")
 function sts:sort() {
-	let $versions :=
-	(
+    let $versions :=
+    (
         "1.0.0", "2.0.0", "2.1.0", "2.1.1", "1.0.0-alpha", "1.0.0-alpha.1",
-		"1.0.0-alpha.beta", "1.0.0-beta", "1.0.0-beta.11", "1.0.0-beta.2", "1.0.0-rc.1"
+        "1.0.0-alpha.beta", "1.0.0-beta", "1.0.0-beta.11", "1.0.0-beta.2", "1.0.0-rc.1"
     ) return
         semver:sort($versions)
 };
@@ -54,14 +54,14 @@ function sts:sort-with-coercion() {
 };
 
 declare
-	%test:assertEquals(
-	    "1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta",
-	    "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11",
-	    "1.0.0-rc.1", "1.0.0", "1.1.1", "2.0.0", "2.1.0",
-	    "2.1.1", "2.2", "3")
+    %test:assertEquals(
+        "1.0.0-alpha", "1.0.0-alpha.1", "1.0.0-alpha.beta",
+        "1.0.0-beta", "1.0.0-beta.2", "1.0.0-beta.11",
+        "1.0.0-rc.1", "1.0.0", "1.1.1", "2.0.0", "2.1.0",
+        "2.1.1", "2.2", "3")
 function sts:sort-items-with-coercion() {
-	let $packages :=
-    	<packages>
+    let $packages :=
+        <packages>
             <package version="1.0.0"/>
             <package version="1.1.1"/>
             <package version="2.0.0"/>
