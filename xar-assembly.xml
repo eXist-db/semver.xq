@@ -55,6 +55,14 @@
     
     <!-- changelog - maintained manually, for the package repository -->
     <changelog>
+        <change xmlns="http://exist-db.org/xquery/repo" version="2.4.0">
+            <ul xmlns="http://www.w3.org/1999/xhtml">
+                <li>New: Tests to ensure compatibility with recent releases - <a href="https://github.com/eXist-db/semver.xq/pull/13">#13</a>, <a href="https://github.com/eXist-db/semver.xq/pull/14">#14</a>.</li>
+                <li>Fix: The semver:sort#3 function was not returning all results - <a href="https://github.com/eXist-db/semver.xq/pull/15">#15</a>.</li>
+                <li>New: Create a 'watch' and live deploy environment using Docker - <a href="https://github.com/eXist-db/semver.xq/pull/16">#16</a>.</li>
+                <li>New: Add handling for EXPath Package SemVer Templates - <a href="https://github.com/eXist-db/semver.xq/pull/18">#18</a>.</li>
+            </ul>
+        </change>
         <change xmlns="http://exist-db.org/xquery/repo" version="2.3.0">
             <ul xmlns="http://www.w3.org/1999/xhtml">
                 <li>New: Added a function for sorting arbitrary items, semver:sort#3 - <a href="https://github.com/eXist-db/semver.xq/pull/5">#5</a>.</li>
