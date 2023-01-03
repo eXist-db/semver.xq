@@ -18,6 +18,39 @@ $ mvn package
 
 There will be a `.xar` file in the `target/` sub-folder.
 
+## Performing a Release
+
+This project is configured to use the [Maven Release Plugin](https://maven.apache.org/maven-release/maven-release-plugin/)
+to make creating and subsequently publishing a release easy.
+
+The release plugin will take care of:
+1. Testing the project (all tests must pass)
+2. Verifying all rules, e.g. license declarations present, etc.
+3. Creating a Git Tag and pushing the Tag to GitHub
+4. Building and signing the artifacts (e.g. EXPath Pkg `.xar` file).
+
+Before performing the release, in addition to the Build requirements you need an installed and functioning copy of GPG or [GnuPG](https://gnupg.org/) with your private key setup correctly for signing.
+
+To perform the release, from within your local Git cloned repository run:
+
+```bash
+mvn release:prepare && mvn release:perform
+```
+
+You will be prompted for the answers to a few questions along the way. The default response will be provided for you, and you can simply press "Enter" (or "Return") to accept it. Alternatively you may enter your own value and press "Enter" (or "Return").
+```bash
+What is the release version for "semver.xq"? (org.exist-db.xquery:semver-xq) 2.3.1: : 2.4.0
+What is SCM release tag or label for "semver.xq"? (org.exist-db.xquery:semver-xq) 2.4.0: :
+What is the new development version for "semver.xq"? (org.exist-db.xquery:semver-xq) 2.4.1-SNAPSHOT: :
+```
+
+* For the `release version`, please sensibly consider using the next appropriate [SemVer 2.0.0](https://semver.org/) version number.
+* For the `SCM release tag`, please use the same value as the `release version`.
+* For the `new development version`, the default value should always suffice.
+
+Once the release process completes, there will be a `.xar` file in the `target/` sub-folder. This file may be published to:
+1. GitHub Releases - https://github.com/eXist-db/semver.xq/releases
+2. The eXist-db Public EXPath Repository - https://exist-db.org/exist/apps/public-repo/admin
 
 ## Development / Manual Testing
 
