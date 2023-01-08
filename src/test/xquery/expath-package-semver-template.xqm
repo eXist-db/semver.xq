@@ -90,7 +90,7 @@ declare
 function epst:public-repo-style-scenario() {
     let $semver-min := "4.1.0"
     let $semver-max := "4" 
-    let $available-versions := ("5.0.0", "4.1.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
+    let $available-versions := ("5.0.0", "5.0.0-SNAP", "4.1.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
     let $semver-min-resolved := semver:resolve-if-expath-package-server-template-else-parse($semver-min, "min", true())
     let $semver-max-resolved := semver:resolve-if-expath-package-server-template-else-parse($semver-max, "max", true())
     let $available-versions-parsed-sorted := ($available-versions ! semver:parse(., true())) => semver:sort-parsed()
