@@ -94,12 +94,6 @@ declare variable $semver:expath-package-semver-template-regex :=
     || "(0|[1-9]\d*)"
     (: `.` + Minor version: Empty for a major version template, or a zero or a non-negative integer without leading zeros for a minor version template :)
     || "(?:\.(0|[1-9]\d*))?"
-    (: `.` + Patch version: Empty:)
-    || "()"
-    (: `-` + Pre-release metadata: One or more characters that are not `+` :)
-    || "(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)"
-    (: `+` + Build metadata: One or more characters :)
-    || "(?:\+(.+))?(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"
     (: End of string :)
     || "$";
 
@@ -221,9 +215,6 @@ declare function semver:resolve-expath-package-semver-template($version as xs:st
             let $release-identifiers := $groups[@nr = ("1", "2", "3")] ! replace(., "\D+", "")[. ne ""] ! semver:cast-identifier(.)
             let $major := if ($release-identifiers[1] instance of xs:integer) then $release-identifiers[1] else 0
             let $minor := if ($release-identifiers[2] instance of xs:integer) then $release-identifiers[2] else 0
-            let $patch := if ($release-identifiers[3] instance of xs:integer) then $release-identifiers[3] else 0
-            let $pre-release-identifiers := array { $groups[@nr eq "4"] ! tokenize(., "\.") ! semver:cast-identifier(.) }
-            let $build-metadata-identifiers := array { $groups[@nr eq "5"] ! tokenize(., "\.") ! semver:cast-identifier(.) }
             let $is-major-version-template := empty($release-identifiers[2])
             return
                 if ($is-major-version-template) then
@@ -246,28 +237,91 @@ declare function semver:resolve-expath-package-semver-template($version as xs:st
                     => semver:populate-identifiers()
 };
 
-(:~ Resolve a valid EXPath Package SemVer Template string if it is a valid, or parse a SemVer string (strictly)
+(:~ Check if a version satisfies EXPath Package dependency versioning attributes.
  :  
- :  @param $version An EXPath Package SemVer Template
- :  @param $mode Mode for resolving the template: "min" (floor) or "max" (ceiling)
- :  @return A map containing the resolved/parsed version, with entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
+ :  @param $version A version string
+ :  @param $versions An EXPath Package "versions" versioning attribute
+ :  @param $semver An EXPath Package "semver" versioning attribute
+ :  @param $semver-min An EXPath Package "semver-min" versioning attribute
+ :  @param $semver-min An EXPath Package "semver-max" versioning attribute
+ :  @return True if the version satisfies the attributes, or false if not
  :)
-declare function semver:resolve-if-expath-package-server-template-else-parse($version as xs:string, $mode as xs:string) {
-    semver:resolve-if-expath-package-server-template-else-parse($version, $mode, false())
-};
-
-(:~ Resolve a valid EXPath Package SemVer Template string if it is a valid, or parse a SemVer string (with an option to coerce invalid SemVer strings)
- :  
- :  @param $version An EXPath Package SemVer Template
- :  @param $mode Mode for resolving the template: "min" (floor) or "max" (ceiling)
- :  @param $coerce An option for coercing non-SemVer version strings into parsable form
- :  @return A map containing the resolved/parsed version, with entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array.
- :)
-declare function semver:resolve-if-expath-package-server-template-else-parse($version as xs:string, $mode as xs:string, $coerce as xs:boolean) {
-    if (semver:validate-expath-package-semver-template($version)) then 
-        semver:resolve-expath-package-semver-template($version, $mode)
-    else
-        semver:parse($version, $coerce)
+declare function semver:satisfies-expath-package-dependency-versioning-attributes(
+    $version as xs:string, 
+    $versions as xs:string?, 
+    $semver as xs:string?, 
+    $semver-min as xs:string?, 
+    $semver-max as xs:string?
+) as xs:boolean {
+    (: "If the versions attribute is used, it defines the exact set of acceptable versions 
+     : for the secondary package, separated by spaces." :)
+    let $satisfies-versions :=
+        if (empty($versions)) then
+            false()
+        else
+            $version = tokenize($versions)
+    (: Parse the version and evaluate the remaining versioning attributes, accounting for the possibility 
+     : that they may be EXPath Package SemVer templates. :)
+    let $version-parsed := semver:parse($version, true())
+    let $satisfies-semver := 
+        if (empty($semver)) then
+            false()
+        (: If semver is a template, resolve it into max and min versions :)
+        else if (semver:validate-expath-package-semver-template($semver)) then
+            semver:ge-parsed(
+                $version-parsed,
+                semver:resolve-expath-package-semver-template-min($semver)
+            )
+            and
+            semver:lt-parsed(
+                (: Disregard the pre-release identifier when comparing against EXPath Package SemVer 
+                 : templates :)
+                if (array:size($version-parsed?pre-release) gt 0) then
+                    map:put($version-parsed, "pre-release", [])
+                else
+                    $version-parsed,
+                semver:resolve-expath-package-semver-template-max($semver)
+            )
+        else
+            semver:eq($version, $semver, true())
+    let $satisfies-semver-min :=
+        if (empty($semver-min)) then
+            false()
+        else if (semver:validate-expath-package-semver-template($semver-min)) then
+            semver:ge-parsed(
+                $version-parsed, 
+                semver:resolve-expath-package-semver-template-min($semver-min)
+            )
+        else
+            semver:ge($version, $semver-min, true())
+    let $satisfies-semver-max := 
+        if (empty($semver-max)) then
+            false()
+        else if (semver:validate-expath-package-semver-template($semver-max)) then
+            semver:lt-parsed(
+                (: Disregard the pre-release identifier when comparing against EXPath Package SemVer 
+                 : templates :)
+                if (array:size($version-parsed?pre-release) gt 0) then
+                    map:put($version-parsed, "pre-release", [])
+                else
+                    $version-parsed,
+                semver:resolve-expath-package-semver-template-max($semver-max)
+            )
+        else
+            semver:lt($version, $semver-max, true())
+    return
+        $satisfies-versions 
+        or $satisfies-semver 
+        or (
+            if (exists($semver-min) and exists($semver-max)) then
+                $satisfies-semver-min and $satisfies-semver-max
+            else if (exists($semver-min)) then
+                $satisfies-semver-min
+            else if (exists($semver-max)) then
+                $satisfies-semver-max
+            else
+                false()
+        )
 };
 
 (:~ Serialize a SemVer string
