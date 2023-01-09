@@ -55,6 +55,11 @@
     
     <!-- changelog - maintained manually, for the package repository -->
     <changelog>
+        <change xmlns="http://exist-db.org/xquery/repo" version="3.0.0">
+            <ul xmlns="http://www.w3.org/1999/xhtml">
+                <li>Breaking: Fixes to EXPath Package dependency resolution - <a href="https://github.com/eXist-db/semver.xq/pull/26">#26</a>.</li>
+            </ul>
+        </change>
         <change xmlns="http://exist-db.org/xquery/repo" version="2.4.0">
             <ul xmlns="http://www.w3.org/1999/xhtml">
                 <li>New: Tests to ensure compatibility with recent releases - <a href="https://github.com/eXist-db/semver.xq/pull/13">#13</a>, <a href="https://github.com/eXist-db/semver.xq/pull/14">#14</a>.</li>
