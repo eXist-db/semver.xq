@@ -86,16 +86,81 @@ function epst:minor-max() {
 };
 
 declare
-    %test:assertEquals("4.2.0", "4.7.1")
-function epst:public-repo-style-scenario() {
+    %test:assertEquals("5.0.0", "6.0.1")
+function epst:public-repo-semver-min-scenario() {
+    let $versions-to-filter := ("5.0.0", "4.2.0-SNAPSHOT", "5.0.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
+    let $versions := ()
+    let $semver := ()
+    let $semver-min := "5"
+    let $semver-max := ()
+    return
+        epst:filter-satisfying-expath-package-dependency-versioning-attributes($versions-to-filter, $versions, $semver, $semver-min, $semver-max)
+};
+
+declare
+    %test:assertEquals("3.3.0", "4.2.0-SNAPSHOT", "4.2.0", "4.7.1")
+function epst:public-repo-semver-max-scenario() {
+    let $versions-to-filter := ("5.0.0", "4.2.0-SNAPSHOT", "5.0.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
+    let $versions := ()
+    let $semver := ()
+    let $semver-min := ()
+    let $semver-max := "4"
+    return
+        epst:filter-satisfying-expath-package-dependency-versioning-attributes($versions-to-filter, $versions, $semver, $semver-min, $semver-max)
+};
+
+declare
+    %test:assertEquals("4.2.0-SNAPSHOT", "4.2.0", "4.7.1")
+function epst:public-repo-semver-min-max-scenario() {
+    let $versions-to-filter := ("5.0.0", "4.2.0-SNAPSHOT", "5.0.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
+    let $versions := ()
+    let $semver := ()
     let $semver-min := "4.1.0"
     let $semver-max := "4" 
-    let $available-versions := ("5.0.0", "4.1.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
-    let $semver-min-resolved := semver:resolve-if-expath-package-server-template-else-parse($semver-min, "min", true())
-    let $semver-max-resolved := semver:resolve-if-expath-package-server-template-else-parse($semver-max, "max", true())
-    let $available-versions-parsed-sorted := ($available-versions ! semver:parse(., true())) => semver:sort-parsed()
-    for $version in $available-versions-parsed-sorted
-    where semver:ge-parsed($version, $semver-min-resolved) and semver:lt-parsed($version, $semver-max-resolved)
     return
-        semver:serialize-parsed($version)
+        epst:filter-satisfying-expath-package-dependency-versioning-attributes($versions-to-filter, $versions, $semver, $semver-min, $semver-max)
+};
+
+declare
+    %test:assertEquals("4.2.0-SNAPSHOT", "4.2.0", "4.7.1")
+function epst:public-repo-semver-only-scenario() {
+    let $versions-to-filter := ("5.0.0", "4.2.0-SNAPSHOT", "5.0.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
+    let $versions := ()
+    let $semver := "4"
+    let $semver-min := ()
+    let $semver-max := ()
+    return
+        epst:filter-satisfying-expath-package-dependency-versioning-attributes($versions-to-filter, $versions, $semver, $semver-min, $semver-max)
+};
+
+declare
+    %test:assertEquals("4.2.0-SNAPSHOT", "5.0.0")
+function epst:public-repo-versions-scenario() {
+    let $versions-to-filter := ("5.0.0", "4.2.0-SNAPSHOT", "5.0.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
+    let $versions := ("4.2.0-SNAPSHOT 5.0.0 6.5.0")
+    let $semver := ()
+    let $semver-min := ()
+    let $semver-max := ()
+    return
+        epst:filter-satisfying-expath-package-dependency-versioning-attributes($versions-to-filter, $versions, $semver, $semver-min, $semver-max)
+};
+
+declare
+    %test:assertEquals("3.3.0", "4.2.0", "4.7.1", "5.0.0-SNAPSHOT", "5.0.0")
+function epst:public-repo-all-versioning-attributes() {
+    let $versions-to-filter := ("5.0.0", "4.2.0-SNAPSHOT", "5.0.0-SNAPSHOT", "6.0.1", "4.7.1", "3.3.0", "4.2.0")
+    let $versions := "3.3.0 4.2.0"
+    let $semver := "4.7"
+    let $semver-min := "4.8"
+    let $semver-max := "5"
+    return
+        epst:filter-satisfying-expath-package-dependency-versioning-attributes($versions-to-filter, $versions, $semver, $semver-min, $semver-max)
+};
+
+declare %private function epst:filter-satisfying-expath-package-dependency-versioning-attributes($versions-to-filter as xs:string*, $versions as xs:string*, $semver as xs:string?, $semver-min as xs:string?, $semver-max as xs:string?) as xs:string* {
+    filter(
+        $versions-to-filter,
+        semver:satisfies-expath-package-dependency-versioning-attributes(?, $versions, $semver, $semver-min, $semver-max)
+    )
+    => semver:sort(true())
 };
