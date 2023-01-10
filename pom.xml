@@ -12,7 +12,7 @@
 
     <groupId>org.exist-db.xquery</groupId>
     <artifactId>semver-xq</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1-SNAPSHOT</version>
 
     <name>semver.xq</name>
     <description>XQuery Library for Parsing Semantic Versions</description>
@@ -35,7 +35,7 @@
         <url>https://github.com/eXist-db/semver.xq.git</url>
         <connection>scm:git:https://github.com/eXist-db/semver.xq.git</connection>
         <developerConnection>scm:git:https://github.com/eXist-db/semver.xq.git</developerConnection>
-      <tag>3.0.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <issueManagement>
