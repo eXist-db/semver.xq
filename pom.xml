@@ -223,7 +223,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <exist.version>4.2.0</exist.version>
+                <exist.version>4.10.0</exist.version>
             </properties>
             <repositories>
                 <repository>
