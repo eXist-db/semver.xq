@@ -565,7 +565,7 @@ declare function semver:ge-parsed($parsed-v1 as map(*), $parsed-v2 as map(*)) as
  :  @return true if v1 is equal to v2
  :)
 declare function semver:eq($v1 as xs:string, $v2 as xs:string) as xs:boolean {
-    semver:compare($v1, $v2) eq 0
+    semver:eq($v1, $v2, false())
 };
 
 (:~ Test if v1 is equal to v2 (with an option to coerce invalid SemVer strings)
@@ -575,7 +575,7 @@ declare function semver:eq($v1 as xs:string, $v2 as xs:string) as xs:boolean {
  :  @return true if v1 is equal to v2
  :)
 declare function semver:eq($v1 as xs:string, $v2 as xs:string, $coerce as xs:boolean) as xs:boolean {
-    semver:compare($v1, $v2) eq 0
+    semver:compare($v1, $v2, $coerce) eq 0
 };
 
 (:~ Test if a parsed v1 is equal to a parsed v2
