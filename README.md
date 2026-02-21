@@ -1,6 +1,6 @@
 # semver.xq
 
-[![CI](https://github.com/eXist-db/semver.xq/workflows/CI/badge.svg)](https://github.com/eXist-db/semver.xq/actions?query=workflow%3ACI)
+[![CI](https://github.com/eXist-db/semver.xq/workflows/CI%20semver.xq/badge.svg)](https://github.com/eXist-db/semver.xq/actions?query=workflow%3A%22CI+semver.xq%22)
 [![License](https://img.shields.io/badge/license-BSD%203%20Clause-blue.svg)](http://opensource.org/licenses/BSD-3-Clause)
 
 Validate, compare, sort, parse, and serialize Semantic Versioning (SemVer) 2.0.0 version strings, using XQuery.
