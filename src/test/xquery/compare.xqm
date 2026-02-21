@@ -217,3 +217,18 @@ function stc:compare-lt-parsed() {
         map{"major":2,"minor":0,"patch":0,"pre-release":[],"build-metadata":[],"identifiers":[2,0,0,[],[]]}
     )
 };
+
+(: Regression tests for bug where semver:eq/3 ignored $coerce and called
+   semver:compare/2 instead of semver:compare/3 :)
+
+declare
+    %test:assertTrue
+function stc:eq-coerce-non-semver() {
+    semver:eq("1.0", "1.0.0", true())
+};
+
+declare
+    %test:assertFalse
+function stc:eq-coerce-non-semver-not-equal() {
+    semver:eq("1.0", "2.0.0", true())
+};
