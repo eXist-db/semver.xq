@@ -1,6 +1,7 @@
 # semver.xq
+<img alt="semver.xq logo" src="icon.png" width="128" />
 
-[![CI](https://github.com/eXist-db/semver.xq/workflows/CI%20semver.xq/badge.svg)](https://github.com/eXist-db/semver.xq/actions?query=workflow%3A%22CI+semver.xq%22)
+[![Build Status](https://github.com/eXist-db/semver.xq/actions/workflows/build.yml/badge.svg)](https://github.com/eXist-db/semver.xq/actions/workflows/build.yml)
 [![License](https://img.shields.io/badge/license-BSD%203%20Clause-blue.svg)](http://opensource.org/licenses/BSD-3-Clause)
 
 Validate, compare, sort, parse, and serialize Semantic Versioning (SemVer) 2.0.0 version strings, using XQuery.
@@ -8,71 +9,57 @@ Validate, compare, sort, parse, and serialize Semantic Versioning (SemVer) 2.0.0
 SemVer rules are applied strictly, raising errors when version strings do not conform to the spec. 
 
 ## Building
-* Requirements: Java 8, Apache Maven 3.3+, Git.
 
-If you want to create an EXPath Package for the app, you can run:
+Requirements: Node.js 18+, Git.
 
-```bash
-$ mvn package
-```
-
-There will be a `.xar` file in the `target/` sub-folder.
-
-## Performing a Release
-
-This project is configured to use the [Maven Release Plugin](https://maven.apache.org/maven-release/maven-release-plugin/)
-to make creating and subsequently publishing a release easy.
-
-The release plugin will take care of:
-1. Testing the project (all tests must pass)
-2. Verifying all rules, e.g. license declarations present, etc.
-3. Creating a Git Tag and pushing the Tag to GitHub
-4. Building and signing the artifacts (e.g. EXPath Pkg `.xar` file).
-
-Before performing the release, in addition to the Build requirements you need an installed and functioning copy of GPG or [GnuPG](https://gnupg.org/) with your private key setup correctly for signing.
-
-To perform the release, from within your local Git cloned repository run:
+Install dependencies:
 
 ```bash
-mvn release:prepare && mvn release:perform
+npm install
 ```
 
-You will be prompted for the answers to a few questions along the way. The default response will be provided for you, and you can simply press "Enter" (or "Return") to accept it. Alternatively you may enter your own value and press "Enter" (or "Return").
+Build the EXPath Package (`.xar` file):
+
 ```bash
-What is the release version for "semver.xq"? (org.exist-db.xquery:semver-xq) 2.3.1: : 2.4.0
-What is SCM release tag or label for "semver.xq"? (org.exist-db.xquery:semver-xq) 2.4.0: :
-What is the new development version for "semver.xq"? (org.exist-db.xquery:semver-xq) 2.4.1-SNAPSHOT: :
+npm run build
 ```
 
-* For the `release version`, please sensibly consider using the next appropriate [SemVer 2.0.0](https://semver.org/) version number.
-* For the `SCM release tag`, please use the same value as the `release version`.
-* For the `new development version`, the default value should always suffice.
+The `.xar` file will be in the `dist/` folder.
 
-Once the release process completes, there will be a `.xar` file in the `target/` sub-folder. This file may be published to:
-1. GitHub Releases - https://github.com/eXist-db/semver.xq/releases
-2. The eXist-db Public EXPath Repository - https://exist-db.org/exist/apps/public-repo/admin
+## Releasing
 
-## Development / Manual Testing
+Releases are automated via [semantic-release](https://github.com/semantic-release/semantic-release). Merging conventional commits to `master` triggers an automatic release:
 
-Simply run: `mvn -Pdev docker:start` to start a Docker environment of eXist-db on port 9090
-with the semver.xq package already deployed.
+- `feat:` → minor version bump
+- `fix:` → patch version bump
+- `feat!:` or `BREAKING CHANGE:` footer → major version bump
 
-As the Docker environment binds the files from the host filesystem, changes to the source code
-are reflected immediately in the running eXist-db environment.
+The release workflow builds the `.xar` and publishes it as a GitHub release asset.
 
-You can override the Docker host port for eXist-db from port 9090 to a port of your choosing by
-specifying `-Ddev.port=9191`, e.g.: `mvn -Pdev -Ddev.port=9191 docker:start`.
+## Testing
 
-If you also want the Dashboard and eXide to be available from the Docker environment of eXist-db
-you can invoke the target `public-xar-repo:resolve` before you call `docker:start`,
-e.g. `mvn -Pdev public-xar-repo:resolve docker:start`.
+Copy `.env.example` to `.env` and configure your eXist-db connection, then run:
 
-To stop the Docker environment run: `mvn -Pdev docker:stop`.
+```bash
+npm test
+```
+
+This installs the XAR and test modules into eXist-db, then runs the XQSuite test suites via HTTP.
+
+## Development
+
+With a local eXist-db running (configure `.env`), start watch mode:
+
+```bash
+npm run develop
+```
+
+This builds and deploys the XAR, uploads test files, and watches for changes.
 
 ## API Documentation
 
 * Variables: [$semver:regex](#var_semver_regex), [$semver:coerce-regex](#var_semver_coerce-regex), [$semver:expath-package-semver-template-regex](#var_semver_expath-package-semver-template-regex)
-* Functions: [semver:validate\#1](#func_semver_validate_1), [semver:validate-expath-package-semver-template\#1](#func_semver_validate-expath-package-semver-template_1), [semver:parse\#1](#func_semver_parse_1), [semver:parse\#2](#func_semver_parse_2), [semver:coerce\#1](#func_semver_coerce_1), [semver:resolve-expath-package-semver-template-min\#1](#func_semver_resolve-expath-package-semver-template-min_1), [semver:resolve-expath-package-semver-template-max\#1](#func_semver_resolve-expath-package-semver-template-max_1), [semver:resolve-expath-package-semver-template\#2](#func_semver_resolve-expath-package-semver-template_2), [semver:satisfies-expath-package-dependency-versioning-attributes\#5](#func_semver_satisfies-expath-package-dependency-versioning-attributes_5), [semver:serialize\#5](#func_semver_serialize_5), [semver:serialize\#1](#func_semver_serialize_1), [semver:serialize-parsed\#1](#func_semver_serialize-parsed_1), [semver:compare\#2](#func_semver_compare_2), [semver:compare\#3](#func_semver_compare_3), [semver:compare-parsed\#2](#func_semver_compare-parsed_2), [semver:lt\#2](#func_semver_lt_2), [semver:lt\#3](#func_semver_lt_3), [semver:lt-parsed\#2](#func_semver_lt-parsed_2), [semver:le\#2](#func_semver_le_2), [semver:le\#3](#func_semver_le_3), [semver:le-parsed\#2](#func_semver_le-parsed_2), [semver:gt\#2](#func_semver_gt_2), [semver:gt\#3](#func_semver_gt_3), [semver:gt-parsed\#2](#func_semver_gt-parsed_2), [semver:ge\#2](#func_semver_ge_2), [semver:ge\#3](#func_semver_ge_3), [semver:ge-parsed\#2](#func_semver_ge-parsed_2), [semver:eq\#2](#func_semver_eq_2), [semver:eq\#3](#func_semver_eq_3), [semver:eq-parsed\#2](#func_semver_eq-parsed_2), [semver:ne\#2](#func_semver_ne_2), [semver:ne\#3](#func_semver_ne_3), [semver:ne-parsed\#2](#func_semver_ne-parsed_2), [semver:sort\#1](#func_semver_sort_1), [semver:sort\#2](#func_semver_sort_2), [semver:sort\#3](#func_semver_sort_3), [semver:sort-parsed\#1](#func_semver_sort-parsed_1)
+* Functions: [semver:validate\#1](#func_semver_validate_1), [semver:validate-expath-package-semver-template\#1](#func_semver_validate-expath-package-semver-template_1), [semver:parse\#1](#func_semver_parse_1), [semver:parse\#2](#func_semver_parse_2), [semver:coerce\#1](#func_semver_coerce_1), [semver:resolve-expath-package-semver-template-min\#1](#func_semver_resolve-expath-package-semver-template-min_1), [semver:resolve-expath-package-semver-template-max\#1](#func_semver_resolve-expath-package-semver-template-max_1), [semver:resolve-expath-package-semver-template\#2](#func_semver_resolve-expath-package-semver-template_2), [semver:satisfies-expath-package-dependency-versioning-attributes\#5](#func_semver_satisfies-expath-package-dependency-versioning-attributes_5), [semver:serialize\#5](#func_semver_serialize_5), [semver:serialize\#1](#func_semver_serialize_1), [semver:serialize-parsed\#1](#func_semver_serialize-parsed_1), [semver:compare\#2](#func_semver_compare_2), [semver:compare\#3](#func_semver_compare_3), [semver:compare-parsed\#2](#func_semver_compare-parsed_2), [semver:lt\#2](#func_semver_lt_2), [semver:lt\#3](#func_semver_lt_3), [semver:lt-parsed\#2](#func_semver_lt-parsed_2), [semver:le\#2](#func_semver_le_2), [semver:le\#3](#func_semver_le_3), [semver:le-parsed\#2](#func_semver_le-parsed_2), [semver:gt\#2](#func_semver_gt_2), [semver:gt\#3](#func_semver_gt_3), [semver:gt-parsed\#2](#func_semver_gt-parsed_2), [semver:ge\#2](#func_semver_ge_2), [semver:ge\#3](#func_semver_ge_3), [semver:ge-parsed\#2](#func_semver_ge-parsed_2), [semver:eq\#2](#func_semver_eq_2), [semver:eq\#3](#func_semver_eq_3), [semver:eq-parsed\#2](#func_semver_eq-parsed_2), [semver:ne\#2](#func_semver_ne_2), [semver:ne\#3](#func_semver_ne_3), [semver:ne-parsed\#2](#func_semver_ne-parsed_2), [semver:sort\#1](#func_semver_sort_1), [semver:sort\#2](#func_semver_sort_2), [semver:sort\#3](#func_semver_sort_3), [semver:sort-parsed\#1](#func_semver_sort-parsed_1), [semver:increment\#1](#func_semver_increment_1), [semver:increment\#2](#func_semver_increment_2), [semver:increment-parsed\#1](#func_semver_increment-parsed_1), [semver:increment-parsed\#2](#func_semver_increment-parsed_2)
 
 
 ### Variables
@@ -557,5 +544,59 @@ Sort SemVer maps
 * `$parsed-versions as map(*)*` — A sequence of SemVer maps, containing entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array
 
 **Returns** `map(*)*`: A sorted sequence of SemVer maps
+
+#### <a name="func_semver_increment_1"/> semver:increment\#1
+```xquery
+semver:increment($version as xs:string) as xs:string
+```
+Increment a version for a patch release
+
+**Params**
+* `$version as xs:string` — A version string
+
+**Returns** `xs:string`: The incremented version string
+
+#### <a name="func_semver_increment_2"/> semver:increment\#2
+```xquery
+semver:increment($version as xs:string, $release-type as xs:string) as xs:string
+```
+Increment a version for a major, minor, or patch release.
+
+Incrementing "1.0.0" for a "major" release will return "2.0.0"; for a "minor" will return "1.1.0"; and for a "patch" (the default) will return "1.0.1".
+
+**Params**
+* `$version as xs:string` — A version string
+* `$release-type as xs:string` — The type of release: major, minor, or patch
+
+**Returns** `xs:string`: The incremented version string
+
+**Errors** `release-type`
+
+#### <a name="func_semver_increment-parsed_1"/> semver:increment-parsed\#1
+```xquery
+semver:increment-parsed($parsed-version as map(*)) as map(*)
+```
+Increment a parsed version for a patch release
+
+**Params**
+* `$parsed-version as map(*)` — A SemVer map, containing entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array
+
+**Returns** `map(*)`: The incremented SemVer map
+
+#### <a name="func_semver_increment-parsed_2"/> semver:increment-parsed\#2
+```xquery
+semver:increment-parsed($parsed-version as map(*), $release-type as xs:string) as map(*)
+```
+Increment a parsed version for a major, minor, or patch release.
+
+Incrementing "1.0.0" for a "major" release will return "2.0.0"; for a "minor" will return "1.1.0"; and for a "patch" (the default) will return "1.0.1".
+
+**Params**
+* `$parsed-version as map(*)` — A SemVer map, containing entries for each identifier ("major", "minor", "patch", "pre-release", and "build-metadata"), and an "identifiers" entry with all identifiers in an array
+* `$release-type as xs:string` — The type of release: major, minor, or patch
+
+**Returns** `map(*)`: The incremented SemVer map
+
+**Errors** `release-type`
 
 *Generated by [xquerydoc](https://github.com/xquery/xquerydoc)*
