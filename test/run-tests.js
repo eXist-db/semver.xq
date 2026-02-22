@@ -10,6 +10,7 @@ const testModulePaths = [
   'xmldb:exist:///db/apps/semver-xq/tests/coerce.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/compare.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/expath-package-semver-template.xqm',
+  'xmldb:exist:///db/apps/semver-xq/tests/increment.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/serialize.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/sort.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/validate-and-parse.xqm'
