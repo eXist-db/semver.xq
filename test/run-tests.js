@@ -12,6 +12,7 @@ const testModulePaths = [
   'xmldb:exist:///db/apps/semver-xq/tests/coerce.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/compare.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/expath-package-semver-template.xqm',
+  'xmldb:exist:///db/apps/semver-xq/tests/increment.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/serialize.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/sort.xqm',
   'xmldb:exist:///db/apps/semver-xq/tests/validate-and-parse.xqm'
@@ -66,7 +67,7 @@ async function runTests () {
   let match
   while ((match = testsuiteRegex.exec(xml)) !== null) {
     const el = match[0]
-    const nameMatch = el.match(/name="([^"]*)"/)
+    const nameMatch = el.match(/package="([^"]*)"/)
     const testsMatch = el.match(/tests="(\d+)"/)
     const failuresMatch = el.match(/failures="(\d+)"/)
     const errorsMatch = el.match(/errors="(\d+)"/)
