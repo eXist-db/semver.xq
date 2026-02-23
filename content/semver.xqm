@@ -767,6 +767,101 @@ declare %private function semver:sort-pre-release($parsed-versions as map(*)*, $
         $sorted-versions
 };
 
+(:~ Increment a version for a patch release. 
+ : 
+ :  @param $version A version string
+ :  @return The incremented version string
+ :)
+declare function semver:increment($version as xs:string) as xs:string {
+    semver:increment($version, "patch")
+};
+
+(:~ Increment a version for a patch release. 
+ : 
+ :  @param $version A version string
+ :  @return The incremented version string
+ :)
+declare function semver:increment-parsed($parsed-versions as map(*)) as map(*) {
+    semver:increment-parsed($parsed-versions, "patch")
+};
+
+
+(:~ Increment a version for a major, minor, or patch release.
+ :  
+ :  Incrementing "1.0.0" for a "major" release will return "2.0.0"; for a "minor" will return "1.1.0"; 
+ :  and for a "patch" (the default) will return "1.0.1". 
+ :
+ :  @param $version A version string
+ :  @param $release-type The type of release: major, minor, or patch.
+ :  @return The incremented version string
+ :)
+declare function semver:increment($version as xs:string, $release-type as xs:string) as xs:string {
+    $version
+    => semver:parse()
+    => semver:increment-parsed($release-type)
+    => semver:serialize()
+};
+
+(:~ Increment a version for a major, minor, or patch release.
+ :  
+ :  Incrementing "1.0.0" for a "major" release will return "2.0.0"; for a "minor" will return "1.1.0"; 
+ :  and for a "patch" (the default) will return "1.0.1". 
+ :
+ :  @param $version A version string
+ :  @param $release-type The type of release: major, minor, or patch.
+ :  @return The incremented version string
+ :)
+declare function semver:increment-parsed($parsed-versions as map(*), $release-type as xs:string) as map(*) {
+    switch ($release-type)
+        case "major" return 
+            map {
+                "major": 
+                    (: 1.0.0-beta -> 1.0.0 :)
+                    if (array:size($parsed-versions?pre-release) ge 1 and $parsed-versions?minor eq 0 and $parsed-versions?patch eq 0) then
+                        $parsed-versions?major
+                    (: 1.2.3 -> 2.0.0 :)
+                    else
+                        $parsed-versions?major + 1,
+                "minor": 0,
+                "patch": 0,
+                "pre-release": [],
+                "build-metadata": []
+            }
+            => semver:populate-identifiers()
+        case "minor" return 
+            map {
+                "major": $parsed-versions?major,
+                "minor": 
+                    (: 1.1.0-beta -> 1.1.0 :)
+                    if (array:size($parsed-versions?pre-release) ge 1 and $parsed-versions?patch eq 0) then
+                        $parsed-versions?minor
+                    (: 1.2.3 -> 1.3.0 :)
+                    else
+                        $parsed-versions?minor + 1,
+                "patch": 0,
+                "pre-release": [],
+                "build-metadata": []
+            }
+            => semver:populate-identifiers()
+        case "patch" return 
+            map {
+                "major": $parsed-versions?major,
+                "minor": $parsed-versions?minor,
+                "patch": 
+                    (: 1.0.0-beta -> 1.0.0 :)
+                    if (array:size($parsed-versions?pre-release) ge 1) then
+                        $parsed-versions?patch
+                    (: 1.2.3 -> 1.2.4 :)
+                    else
+                        $parsed-versions?patch + 1,
+                "pre-release": [],
+                "build-metadata": []
+            }
+            => semver:populate-identifiers()
+        default return 
+            semver:error("release-type", $release-type)
+};
+
 (:~ Raise a descriptive error
  :  
  :  @param $code An error code
@@ -790,6 +885,11 @@ declare %private function semver:error($code as xs:string, $version as xs:string
                 map {
                     "description": "Template did not conform to the EXPath Package spec for SemVer templates",
                     "qname": QName("http://joewiz.org/ns/xquery/semver", "template-error")
+                },
+            "release-type": 
+                map {
+                    "description": "Unsupported release type: only major, minor, and patch",
+                    "qname": QName("http://joewiz.org/ns/xquery/semver", "release-type")
                 }
         }
     let $error := $errors?($code)
