@@ -27,7 +27,7 @@ The `.xar` file will be in the `dist/` folder.
 
 ## Releasing
 
-Releases are automated via [semantic-release](https://github.com/semantic-release/semantic-release). Merging conventional commits to `master` triggers an automatic release:
+Releases are automated via [semantic-release](https://github.com/semantic-release/semantic-release). Commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification — enforced locally via [commitlint](https://commitlint.js.org/). Merging to `master` triggers an automatic release:
 
 - `feat:` → minor version bump
 - `fix:` → patch version bump
