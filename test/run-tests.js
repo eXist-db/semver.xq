@@ -47,7 +47,12 @@ async function runTests () {
 
   for (let i = 0; i < testsuites.length; i++) {
     const suite = testsuites.item(i)
-    const name = suite.getAttribute('name') || suite.getAttribute('package') || 'unknown'
+    const firstTestcase = suite.getElementsByTagName('testcase').item(0)
+    const classname = firstTestcase?.getAttribute('classname') || ''
+    const name = suite.getAttribute('name') ||
+      suite.getAttribute('package') ||
+      classname.split(/[/#]/).filter(Boolean).pop() ||
+      'unknown'
     const tests = parseInt(suite.getAttribute('tests') || '0', 10)
     const failures = parseInt(suite.getAttribute('failures') || '0', 10)
     const errors = parseInt(suite.getAttribute('errors') || '0', 10)
