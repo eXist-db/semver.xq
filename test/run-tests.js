@@ -1,12 +1,10 @@
-import axios from 'axios'
-import https from 'https'
+import { getXmlRpcClient, readOptionsFromEnv } from '@existdb/node-exist'
+import { DOMParser } from '@xmldom/xmldom'
 
-const server = process.env.EXISTDB_SERVER || 'https://localhost:8443'
-const user = process.env.EXISTDB_USER || 'admin'
-const pass = process.env.EXISTDB_PASS || ''
-
-// Allow self-signed certs on localhost (eXist-db Docker uses one by default)
-const httpsAgent = new https.Agent({ rejectUnauthorized: false })
+const connectionOptions = Object.assign(
+  { basic_auth: { user: process.env.EXISTDB_USER || 'admin', pass: process.env.EXISTDB_PASS || '' } },
+  readOptionsFromEnv()
+)
 
 const testModulePaths = [
   'xmldb:exist:///db/apps/semver-xq/tests/coerce.xqm',
@@ -26,55 +24,33 @@ test:suite((
 ))
 `
 
-// Use eXist-db's XML query document format for reliable POST
-const requestBody = `<?xml version="1.0" encoding="UTF-8"?>
-<query xmlns="http://exist.sourceforge.net/NS/exist">
-    <text><![CDATA[${xquery}]]></text>
-    <properties>
-        <property name="indent" value="no"/>
-    </properties>
-</query>`
-
 async function runTests () {
   console.log('Running XQSuite tests...')
 
-  let response
+  let result
   try {
-    response = await axios.post(
-      `${server}/exist/rest/db`,
-      requestBody,
-      {
-        auth: { username: user, password: pass },
-        headers: { 'Content-Type': 'application/xml' },
-        httpsAgent
-      }
-    )
+    const db = getXmlRpcClient(connectionOptions)
+    result = await db.queries.readAll(xquery, {})
   } catch (err) {
-    const status = err.response ? err.response.status : 'no response'
-    const data = err.response ? JSON.stringify(err.response.data).slice(0, 500) : ''
-    console.error(`Failed to run tests (HTTP ${status}): ${err.message}`, data)
+    console.error('Failed to run tests:', err.message)
     process.exit(1)
   }
 
-  const xml = response.data
+  // Each page is a serialized <testsuite> element; wrap for parsing
+  const xml = `<testsuites>${result.pages.join('')}</testsuites>`
+  const doc = new DOMParser().parseFromString(xml, 'text/xml')
+  const testsuites = doc.getElementsByTagName('testsuite')
+
   let totalTests = 0
   let totalFailures = 0
   let totalErrors = 0
 
-  // Parse testsuite elements for failures and errors
-  const testsuiteRegex = /<testsuite[^>]*>/g
-  let match
-  while ((match = testsuiteRegex.exec(xml)) !== null) {
-    const el = match[0]
-    const nameMatch = el.match(/name="([^"]*)"/)
-    const testsMatch = el.match(/tests="(\d+)"/)
-    const failuresMatch = el.match(/failures="(\d+)"/)
-    const errorsMatch = el.match(/errors="(\d+)"/)
-
-    const name = nameMatch ? nameMatch[1] : 'unknown'
-    const tests = testsMatch ? parseInt(testsMatch[1], 10) : 0
-    const failures = failuresMatch ? parseInt(failuresMatch[1], 10) : 0
-    const errors = errorsMatch ? parseInt(errorsMatch[1], 10) : 0
+  for (let i = 0; i < testsuites.length; i++) {
+    const suite = testsuites.item(i)
+    const name = suite.getAttribute('name') || suite.getAttribute('package') || 'unknown'
+    const tests = parseInt(suite.getAttribute('tests') || '0', 10)
+    const failures = parseInt(suite.getAttribute('failures') || '0', 10)
+    const errors = parseInt(suite.getAttribute('errors') || '0', 10)
 
     totalTests += tests
     totalFailures += failures
