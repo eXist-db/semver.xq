@@ -11,6 +11,7 @@ import { readFileSync, writeFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
+import { CommitParser } from 'conventional-commits-parser'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_NS = 'http://exist-db.org/xquery/repo'
@@ -51,12 +52,11 @@ function getCommits (prevTag) {
   }))
 }
 
-function parseConventionalCommit (subject) {
-  const match = subject.match(/^([a-z]+)(?:\(([^)]+)\))?(!)?:\s*(.+)$/)
-  if (!match) return null
-  const [, type, scope, bang, description] = match
-  return { type, scope: scope || null, breaking: !!bang, description }
-}
+const parser = new CommitParser({
+  headerPattern: /^(\w*)(?:\(([^)]*)\))?(!)?:\s(.*)$/,
+  headerCorrespondence: ['type', 'scope', 'breaking', 'subject'],
+  noteKeywords: ['BREAKING CHANGE', 'BREAKING-CHANGE']
+})
 
 function buildChangeItems (commits) {
   const breaking = []
@@ -64,15 +64,15 @@ function buildChangeItems (commits) {
   const fixes = []
 
   for (const { subject, body } of commits) {
-    const parsed = parseConventionalCommit(subject)
-    if (!parsed) continue
+    const parsed = parser.parse(`${subject}\n\n${body}`)
+    if (!parsed.type) continue
 
-    const { type, scope, breaking: bang, description } = parsed
+    const { type, scope, breaking: bang, subject: description, notes } = parsed
     const label = scope ? `${scope}: ${description}` : description
-    const breakingFooter = body.match(/^BREAKING CHANGE:\s*(.+)/m)?.[1]
+    const breakingNote = notes.find(n => n.title === 'BREAKING CHANGE' || n.title === 'BREAKING-CHANGE')
 
-    if (bang || breakingFooter) {
-      breaking.push(breakingFooter || label)
+    if (bang || breakingNote) {
+      breaking.push(breakingNote?.text || label)
     } else if (type === 'feat') {
       features.push(label)
     } else if (type === 'fix') {
