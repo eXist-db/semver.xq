@@ -12,10 +12,37 @@ import { fileURLToPath } from 'url'
 import { dirname, join } from 'path'
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { CommitParser } from 'conventional-commits-parser'
+import { writeChangelogString } from 'conventional-changelog-writer'
+import conventionalChangelogConventionalCommits from 'conventional-changelog-conventionalcommits'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_NS = 'http://exist-db.org/xquery/repo'
 const HTML_NS = 'http://www.w3.org/1999/xhtml'
+
+// Map conventional-changelog section titles to human-readable XML label prefixes
+const SECTION_PREFIX = {
+  Features: 'New',
+  'Bug Fixes': 'Fix',
+  'Performance Improvements': 'Improvement',
+  Reverts: 'Revert'
+}
+
+// Handlebars template that emits plain <li> lines — no markdown headers or separators.
+// Breaking-change notes come first (via noteGroups), then regular commits (via commitGroups).
+// Commits carrying breaking-change notes are marked isBreaking=true by our transform so they
+// are suppressed here (their content surfaces via noteGroups instead, avoiding duplicate entries).
+// Each non-breaking commit gets a 'prefix' field injected by our custom transform below.
+const XML_MAIN_TEMPLATE =
+  '{{#each noteGroups}}' +
+  '{{#each notes}}' +
+  '<li>Breaking change: {{text}}</li>\n' +
+  '{{/each}}' +
+  '{{/each}}' +
+  '{{#each commitGroups}}' +
+  '{{#each commits}}' +
+  '{{#unless isBreaking}}<li>{{prefix}}: {{#if scope}}{{scope}}: {{/if}}{{subject}}</li>\n{{/unless}}' +
+  '{{/each}}' +
+  '{{/each}}'
 
 function parseArgs () {
   return Object.fromEntries(
@@ -37,7 +64,7 @@ function tagExists (tag) {
   }
 }
 
-function getCommits (prevTag) {
+function getRawCommits (prevTag) {
   const ref = tagExists(prevTag) ? prevTag
     : tagExists(`v${prevTag}`) ? `v${prevTag}`
       : null
@@ -46,45 +73,57 @@ function getCommits (prevTag) {
   const hashes = execSync(`git log ${ref}..HEAD --format=%H`, { encoding: 'utf8' })
     .trim().split('\n').filter(Boolean)
 
-  return hashes.map(hash => ({
-    subject: execSync(`git log -1 --format=%s ${hash}`, { encoding: 'utf8' }).trim(),
-    body: execSync(`git log -1 --format=%b ${hash}`, { encoding: 'utf8' }).trim()
-  }))
+  return hashes.map(hash =>
+    execSync(`git log -1 --format=%B ${hash}`, { encoding: 'utf8' }).trim()
+  )
 }
 
-const parser = new CommitParser({
-  headerPattern: /^(\w*)(?:\(([^)]*)\))?(!)?:\s(.*)$/,
-  headerCorrespondence: ['type', 'scope', 'breaking', 'subject'],
-  noteKeywords: ['BREAKING CHANGE', 'BREAKING-CHANGE']
-})
+async function buildChangeItems (rawCommits, version) {
+  // Use the preset for both parser and writer options — the same configuration
+  // that semantic-release uses internally, ensuring consistent commit classification.
+  const { parser: parserOpts, writer: writerOpts } = await conventionalChangelogConventionalCommits()
+  const commitParser = new CommitParser(parserOpts)
 
-function buildChangeItems (commits) {
-  const breaking = []
-  const features = []
-  const fixes = []
+  const parsed = rawCommits.map(msg => commitParser.parse(msg)).filter(c => c.type)
 
-  for (const { subject, body } of commits) {
-    const parsed = parser.parse(`${subject}\n\n${body}`)
-    if (!parsed.type) continue
-
-    const { type, scope, breaking: bang, subject: description, notes } = parsed
-    const label = scope ? `${scope}: ${description}` : description
-    const breakingNote = notes.find(n => n.title === 'BREAKING CHANGE' || n.title === 'BREAKING-CHANGE')
-
-    if (bang || breakingNote) {
-      breaking.push(breakingNote?.text || label)
-    } else if (type === 'feat') {
-      features.push(label)
-    } else if (type === 'fix') {
-      fixes.push(label)
+  // Wrap the preset's transform to inject our 'prefix' field.
+  // Commits with breaking-change notes must NOT be filtered out (returning null would also
+  // discard their notes, so they'd never reach noteGroups). Instead we mark them isBreaking=true
+  // so the template suppresses their commit line while still rendering their notes via noteGroups.
+  const presetTransform = writerOpts.transform
+  const writerOptions = {
+    ...writerOpts,
+    mainTemplate: XML_MAIN_TEMPLATE,
+    headerPartial: '',
+    commitPartial: '',
+    footerPartial: '',
+    transform (commit, context) {
+      const transformed = presetTransform(commit, context)
+      if (!transformed) return null
+      if (transformed.notes.length > 0) {
+        transformed.isBreaking = true
+        return transformed
+      }
+      transformed.prefix = SECTION_PREFIX[transformed.type] ?? transformed.type
+      return transformed
     }
   }
 
-  return [
-    ...breaking.map(b => `Breaking change: ${b}`),
-    ...features.map(f => `New: ${f}`),
-    ...fixes.map(f => `Fix: ${f}`)
-  ]
+  const output = await writeChangelogString(parsed, { version }, writerOptions)
+
+  // Wrap the emitted <li> lines in a temporary root element so @xmldom/xmldom
+  // can parse them as proper XML nodes, then extract their text content.
+  const doc = new DOMParser().parseFromString(
+    `<ul xmlns="${HTML_NS}">${output}</ul>`,
+    'text/xml'
+  )
+  const liNodes = doc.getElementsByTagNameNS(HTML_NS, 'li')
+  const items = []
+  for (let i = 0; i < liNodes.length; i++) {
+    const text = liNodes.item(i).textContent
+    if (text) items.push(text)
+  }
+  return items
 }
 
 function insertChangeEntry (tmplPath, version, items) {
@@ -134,8 +173,8 @@ if (!version || !prevTag) {
   process.exit(1)
 }
 
-const commits = getCommits(prevTag)
-const items = buildChangeItems(commits)
+const rawCommits = getRawCommits(prevTag)
+const items = await buildChangeItems(rawCommits, version)
 
 if (items.length === 0) {
   console.log(`No notable commits since ${prevTag}, skipping changelog update`)
