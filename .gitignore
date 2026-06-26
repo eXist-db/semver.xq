@@ -1,4 +1,12 @@
 ##############################
+## Node.js
+##############################
+node_modules/
+dist/
+.build/
+.env
+
+##############################
 ## Java
 ##############################
 .mtj.tmp/
@@ -8,21 +16,6 @@
 *.ear
 *.nar
 hs_err_pid*
-
-##############################
-## Maven
-##############################
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
-pom.xml.bak
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/timing.properties
-!.mvn/wrapper/maven-wrapper.jar
 
 ##############################
 ## Gradle
