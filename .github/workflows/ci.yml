@@ -4,11 +4,37 @@ jobs:
   build:
     name: Build and Test Semver.xq (${{ matrix.os }} / JDK ${{ matrix.jdk }} / eXist-db ${{ matrix.exist-version }})
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        jdk: ['8', '11']
-        exist-version: ['4.2.0', '5.1.0', '6.1.0-SNAPSHOT']
-        os: [ubuntu-latest]
+        include:
+          - os: ubuntu-latest
+            jdk: '8'
+            exist-version: '4.2.0'
+            maven_args: ''
+          - os: ubuntu-latest
+            jdk: '11'
+            exist-version: '4.2.0'
+            maven_args: ''
+          - os: ubuntu-latest
+            jdk: '8'
+            exist-version: '5.1.0'
+            maven_args: '-Pexistdb-5-or-newer -Dexist.version=5.1.0'
+          - os: ubuntu-latest
+            jdk: '11'
+            exist-version: '5.1.0'
+            maven_args: '-Pexistdb-5-or-newer -Dexist.version=5.1.0'
+          - os: ubuntu-latest
+            jdk: '8'
+            exist-version: '6.1.0-SNAPSHOT'
+            maven_args: '-Pexistdb-5-or-newer -Dexist.version=6.1.0-SNAPSHOT'
+          - os: ubuntu-latest
+            jdk: '11'
+            exist-version: '6.1.0-SNAPSHOT'
+            maven_args: '-Pexistdb-5-or-newer -Dexist.version=6.1.0-SNAPSHOT'
+          - os: ubuntu-latest
+            jdk: '21'
+            exist-version: '7.0.0-SNAPSHOT'
+            maven_args: '-Pexistdb-7'
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -17,23 +43,18 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.jdk }}
-      - name: Cache Maven packages
-        uses: actions/cache@v6
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-${{ matrix.exist-version }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-${{ matrix.exist-version }}-maven
+          cache: maven
+          # Auth for GitHub Packages (exist-core 7.x SNAPSHOT). Harmless for older exist versions.
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
       - name: Maven Build
-        run: |
-          if [[ "${{ matrix.exist-version }}" == "4.2.0" ]]; then
-              mvn -V clean package -DskipTests
-          else
-              mvn -V clean package -DskipTests -Pexistdb-5-or-newer -Dexist.version=${{ matrix.exist-version }}
-          fi
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -V -B -U clean package -DskipTests ${{ matrix.maven_args }}
       - name: Test
-        run: |
-          if [[ "${{ matrix.exist-version }}" == "4.2.0" ]]; then
-              mvn verify
-          else
-              mvn verify -Pexistdb-5-or-newer -Dexist.version=${{ matrix.exist-version }}
-          fi
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -B verify ${{ matrix.maven_args }}
