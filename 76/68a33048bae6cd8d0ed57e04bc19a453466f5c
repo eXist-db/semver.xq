@@ -1,0 +1,29 @@
+pom.xml
+  s_c292e5b13c6905::t_c2d26a6a81c5b6 67-74,77-87
+  s_c292e5b13c6905::t_e7c30d77455ed0 162-179
+  s_c292e5b13c6905::t_66ab0dd68d9b82 228-235
+  s_c292e5b13c6905::t_05c7cf73b67968 368-382,390-425
+  s_c292e5b13c6905::t_84116c06de61ea 383-389
+  s_c292e5b13c6905::t_aa288b092ad565 88,161,366-367
+.github/workflows/ci.yml
+  s_c292e5b13c6905::t_2599c7de9e7445 7,9,12-13,16-17,20-21,24-25,28-29,32-33,36-37,46-50,52-55,57-60
+  s_c292e5b13c6905::t_31d38f7dad145d 10-11,14-15,18-19,22-23,26-27,30-31,34-35
+src/test/java-exist7/xquery/CoreTests.java
+  s_c292e5b13c6905::t_40d899162f157a 1-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7668a33048bae6cd8d0ed57e04bc19a453466f5c",
+  "prompts": {},
+  "sessions": {
+    "s_c292e5b13c6905": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "32a8b4b6-84c8-4621-82ce-96c1a9c0a2a3",
+        "model": "default"
+      },
+      "human_author": "duncdrum <d.paterson@me.com>"
+    }
+  }
+}
