@@ -1,4 +1,5 @@
 {
+  "tagFormat": "${version}",
   "plugins": [
     ["@semantic-release/commit-analyzer", {
       "preset": "conventionalcommits"
@@ -7,9 +8,10 @@
       "preset": "conventionalcommits"
     }],
     ["@semantic-release/exec", {
-      "prepareCmd": "npm version ${nextRelease.version} --no-git-tag-version --allow-same-version && node scripts/update-repo-changelog.js --version=${nextRelease.version} --prev-tag=${lastRelease.version}",
+      "prepareCmd": "npm version ${nextRelease.version} --no-git-tag-version --allow-same-version",
       "publishCmd": "npm run build"
     }],
+    "@existdb/repo-xml-changelog-generator",
     ["@semantic-release/git", {
       "assets": ["package.json", "repo.xml.tmpl"],
       "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"

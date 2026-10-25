@@ -4,6 +4,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # semantic-release's stable commit-analyzer / release-notes-generator
+      # still bundle conventional-changelog-writer v8, which cannot render
+      # preset v10. Lift once they move to writer v9.
+      - dependency-name: "conventional-changelog-conventionalcommits"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
