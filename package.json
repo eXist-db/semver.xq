@@ -18,7 +18,7 @@
   "devDependencies": {
     "@commitlint/cli": "^20.4.2",
     "@commitlint/config-conventional": "^20.4.2",
-    "@existdb/gulp-exist": "^5.0.0",
+    "@existdb/gulp-exist": "^6.0.0",
     "@existdb/gulp-replace-tmpl": "^1.0.4",
     "@existdb/node-exist": "^7.0.0",
     "@existdb/repo-xml-changelog-generator": "^2.0.0",
