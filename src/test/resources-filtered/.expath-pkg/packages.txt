@@ -1,1 +1,0 @@
-semver-xq-${project.version} http://exist-db.org/xquery/semver-xq ${project.version}
