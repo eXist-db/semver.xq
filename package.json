@@ -16,7 +16,7 @@
   },
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "@commitlint/cli": "^20.4.2",
+    "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^20.4.2",
     "@existdb/gulp-exist": "^5.0.0",
     "@existdb/gulp-replace-tmpl": "^1.0.4",
