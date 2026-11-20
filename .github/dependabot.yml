@@ -4,13 +4,39 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
     ignore:
       # semantic-release's stable commit-analyzer / release-notes-generator
       # still bundle conventional-changelog-writer v8, which cannot render
-      # preset v10. Lift once they move to writer v9.
+      # preset v10. Lift once they move to writer v9 (semantic-release 26).
       - dependency-name: "conventional-changelog-conventionalcommits"
         update-types: ["version-update:semver-major"]
+    groups:
+      commitlint:
+        patterns:
+          - "@commitlint/*"
+          - "husky"
+      semantic-release:
+        patterns:
+          - "semantic-release"
+          - "@semantic-release/*"
+          - "@existdb/repo-xml-changelog-generator"
+          - "conventional-changelog-*"
+      exist-build:
+        patterns:
+          - "@existdb/*"
+          - "gulp"
+          - "gulp-*"
+          - "delete"
+          - "dotenv-cli"
+          - "@xmldom/xmldom"
+        exclude-patterns:
+          - "@existdb/repo-xml-changelog-generator"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
